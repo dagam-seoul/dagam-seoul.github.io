@@ -82,7 +82,7 @@ th{background:#f1eee7}
 const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
 const LS_KEY = 'dagam_survey_v1';
-const SHEET_WEBHOOK = ''; // 구글 Apps Script 웹앱 주소(https://script.google.com/macros/s/.../exec)를 넣으면 시트에 자동 저장
+const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyhzRzWCNNUYSM4yGCTNKwAAZobXdLV6CoeNAHVx0-xF01Q-XGskt18fJilzBKkzdsD/exec'; // 구글 Apps Script 웹앱 주소(https://script.google.com/macros/s/.../exec)를 넣으면 시트에 자동 저장
 function sheetPost(obj){
   if(!SHEET_WEBHOOK) return;
   try{ fetch(SHEET_WEBHOOK, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(obj)}); }catch(e){}
