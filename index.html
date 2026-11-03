@@ -82,6 +82,21 @@ th{background:#f1eee7}
 const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
 const LS_KEY = 'dagam_survey_v1';
+const SHEET_WEBHOOK = ''; // 구글 Apps Script 웹앱 주소(https://script.google.com/macros/s/.../exec)를 넣으면 시트에 자동 저장
+function sheetPost(obj){
+  if(!SHEET_WEBHOOK) return;
+  try{ fetch(SHEET_WEBHOOK, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(obj)}); }catch(e){}
+}
+function sheetResponse(code, gift, needCheck){
+  const head = ['응답시각','교환권','기념품','확인필요', ...Q.map(q=>q.id.toUpperCase()+' '+q.title)];
+  const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), code, GIFT[gift]||'', needCheck||'',
+    ...Q.map(q => { const v = A[q.id]; if(v===undefined) return ''; if(q.type==='scale'||q.type==='text') return v;
+      if(q.type==='yn') return v==='y'?'예':'아니오'; const o = q.opts.find(o=>o[0]===v); return o?o[1]:v; })];
+  sheetPost({type:'response', headers: head, row});
+}
+function sheetRedeem(code, gift, time){
+  sheetPost({type:'redeem', code, gift: GIFT[gift]||gift, time: new Date(time||Date.now()).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})});
+}
 const GIFT = {tea:'블렌드티 세트', seed:'씨앗팔레트'};
 const CHECK = {reservation:'담당자 확인: 올리 예약 확정 문자 또는 현장 등록 확인', app_review:'담당자 확인: 손목닥터9988 앱 설치 또는 네이버 리뷰 화면 확인'};
 
@@ -181,6 +196,7 @@ async function submit(){
   try{
     const res = await rpc('dagam_submit', {p_device: deviceId(), p_answers: A});
     save({code: res.code});
+    if(!res.existing) sheetResponse(res.code, res.gift, res.need_check);
     showCoupon(res.code, res);
   }catch(e){
     sending = false; $('#next').disabled=false; $('#next').textContent='다시 제출하기';
@@ -226,6 +242,7 @@ $('#pinOk').onclick = async () => {
     else if(r.status==='already'){ $('#pinErr').textContent='이미 증정 완료된 교환권이에요 ('+fmtTime(r.redeemed_at)+').'; }
     else if(r.status==='ok'){
       $('#pinModal').classList.remove('on');
+      sheetRedeem(pinCode, r.gift, r.redeemed_at);
       try{ sessionStorage.setItem('dagam_pin', pin); }catch(e){}
       const ct = r.counts; const k = r.gift;
       toast(`${GIFT[k]} 증정 완료 · 오늘 ${ct[k+'_today']}/${ct[k+'_daily_limit']}`);
@@ -273,7 +290,7 @@ async function renderStaff(){
       <button class="btn" style="width:100%;margin-top:10px" id="doRedeem">증정 완료</button>`;
     $('#doRedeem').onclick = async () => {
       const r = await rpc('dagam_redeem', {p_code: code, p_pin: pin});
-      if(r.status==='ok'){ toast(GIFT[r.gift]+' 증정 완료'); renderStaff(); } else box.innerHTML='<p class="err">처리 실패: '+r.status+'</p>';
+      if(r.status==='ok'){ sheetRedeem(code, r.gift, r.redeemed_at); toast(GIFT[r.gift]+' 증정 완료'); renderStaff(); } else box.innerHTML='<p class="err">처리 실패: '+r.status+'</p>';
     };
   };
 }
