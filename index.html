@@ -79,8 +79,8 @@ th{background:#f1eee7}
 <div class="modal" id="pinModal"><div class="card">
   <h2>담당자 확인</h2>
   <p class="hint" style="margin-bottom:6px">드릴 기념품을 고르고 PIN 4자리를 입력해 주세요.</p>
-  <div class="giftpick" id="giftPick"><button class="opt" data-g="tea">블렌드티 세트</button><button class="opt" data-g="seed">씨앗팔레트</button></div>
-  <div class="guide">블렌드티: 프로그램 예약·참여 + 다감 우체국 참여 (올리 예약 확인)<br>씨앗팔레트: 프로그램 미참여 + 이벤트 참여, 또는 손목닥터9988 앱 설치·네이버 리뷰 확인</div>
+  <div class="giftpick" id="giftPick"><button class="opt" data-g="tea">블렌드 티 세트</button><button class="opt" data-g="seed">씨앗 팔레트</button></div>
+  <div class="guide">블렌드 티: 프로그램 예약·참여 + 다감 우체국 참여 (올리 예약 확인)<br>씨앗 팔레트: 프로그램 미참여 + 이벤트 참여, 또는 손목닥터9988 앱 설치·네이버 리뷰 확인</div>
   <input class="pin" id="pinIn" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN">
   <div class="row"><button class="btn ghost" id="pinCancel">취소</button><button class="btn" id="pinOk">증정 완료</button></div>
   <div class="err" id="pinErr"></div>
@@ -92,7 +92,7 @@ const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
 const LS_KEY = 'dagam_survey_v2';
 const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzjjzCxOGgwKl4bSLaoEqboEDBMRHMKlUfA9c-FH5XICszYpGs3kAwBs6lyfTRlyKup/exec';
-const GIFT = {tea:'블렌드티 세트', seed:'씨앗팔레트'};
+const GIFT = {tea:'블렌드 티 세트', seed:'씨앗 팔레트'};
 const PROG = {post:'다감 우체국', garden:'다감가든', both:'다감 우체국 · 다감가든'};
 
 /* ---------- 문항 ---------- */
@@ -107,7 +107,7 @@ const GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가
 const Q = [
   {id:'q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성'],['na','응답하지 않음']]},
   {id:'q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
-  {id:'q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요'],['etc','기타 (직접 입력)']]},
+  {id:'q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
   {id:'q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
 
   {id:'p1', sec:'다감 우체국', lead:POST_LEAD, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
@@ -185,9 +185,9 @@ function renderQ(){
   let body = '';
   if(q.type==='single'){
     body = `<div class="opts">${q.opts.map(([v,t]) => `<button class="opt ${A[q.id]===v?'on':''}" data-v="${v}">${esc(t)}</button>`).join('')}</div>`;
-    if(A[q.id]==='etc') body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요" value="${esc(A[q.id+'_etc']||'')}">`;
+    if(A[q.id]==='etc') body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요." value="${esc(A[q.id+'_etc']||'')}">`;
   } else {
-    body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요">${esc(A[q.id]||'')}</textarea>`;
+    body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요.">${esc(A[q.id]||'')}</textarea>`;
   }
   $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}</span>
     ${showLead?`<p class="lead">${esc(showLead)}</p>`:''}
@@ -267,7 +267,7 @@ $('#pinOk').onclick = async () => {
   try{
     const r = await rpc('dagam_redeem', {p_code: pinCode, p_pin: pin, p_gift: pinGift});
     if(r.status==='bad_pin') $('#pinErr').textContent='PIN이 맞지 않아요.';
-    else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요 ('+fmtTime(r.redeemed_at)+').';
+    else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요. ('+fmtTime(r.redeemed_at)+').';
     else if(r.status==='ok'){
       $('#pinModal').classList.remove('on');
       try{ sessionStorage.setItem('dagam_pin', pin); }catch(e){}
@@ -301,8 +301,8 @@ async function renderStaff(){
   $('#app').innerHTML = `
     <h1>기념품 증정 현황</h1>
     <div class="stat">
-      <div><span>블렌드티 세트 · 오늘</span><b class="${c.tea_today>c.tea_daily_limit?'over':''}">${c.tea_today} / ${c.tea_daily_limit}</b><span>누적 ${c.tea_all} / ${c.tea_total}</span></div>
-      <div><span>씨앗팔레트 · 오늘</span><b class="${c.seed_today>c.seed_daily_limit?'over':''}">${c.seed_today} / ${c.seed_daily_limit}</b><span>누적 ${c.seed_all} / ${c.seed_total}</span></div>
+      <div><span>블렌드 티 세트 · 오늘</span><b class="${c.tea_today>c.tea_daily_limit?'over':''}">${c.tea_today} / ${c.tea_daily_limit}</b><span>누적 ${c.tea_all} / ${c.tea_total}</span></div>
+      <div><span>씨앗 팔레트 · 오늘</span><b class="${c.seed_today>c.seed_daily_limit?'over':''}">${c.seed_today} / ${c.seed_daily_limit}</b><span>누적 ${c.seed_all} / ${c.seed_total}</span></div>
     </div>
     <p class="small">오늘 설문 응답 ${c.resp_today}건 · 하루 한도는 내부 관리용이에요.</p>
     <div class="card" style="margin:14px 0">
@@ -347,11 +347,11 @@ async function renderAdmin(){
     <h1>설문·기념품 현황</h1>
     <div class="stat">
       <div><span>전체 응답</span><b>${rows.length}</b><span>오늘 ${c.resp_today} · 우체국 ${prog.post} · 가든 ${prog.garden} · 모두 ${prog.both}</span></div>
-      <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
+      <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드 티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
     </div>
     <button class="btn" style="width:100%;margin:6px 0 18px" id="csv">응답 전체 CSV 내려받기</button>
     <h2>날짜별</h2>
-    <table><tr><th>날짜</th><th>응답</th><th>블렌드티</th><th>씨앗</th></tr>
+    <table><tr><th>날짜</th><th>응답</th><th>블렌드 티</th><th>씨앗</th></tr>
     ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k].n}</td><td>${byDay[k].tea||0}</td><td>${byDay[k].seed||0}</td></tr>`).join('')}</table>
     <h2 style="margin-top:22px">만족도 (5점 평균 · 긍정률)</h2>
     <table><tr><th>문항</th><th>전체</th><th>우체국만</th><th>가든만</th><th>모두</th></tr>
