@@ -79,8 +79,8 @@ th{background:#f1eee7}
 <div class="modal" id="pinModal"><div class="card">
   <h2>담당자 확인</h2>
   <p class="hint" style="margin-bottom:6px">드릴 기념품을 고르고 PIN 4자리를 입력해 주세요.</p>
-  <div class="giftpick" id="giftPick"><button class="opt" data-g="tea">블렌드 티 세트</button><button class="opt" data-g="seed">씨앗 팔레트</button></div>
-  <div class="guide">블렌드 티: 프로그램 예약·참여 + 다감 우체국 참여 (올리 예약 확인)<br>씨앗 팔레트: 프로그램 미참여 + 이벤트 참여, 또는 손목닥터9988 앱 설치·네이버 리뷰 확인</div>
+  <div class="giftpick" id="giftPick"><button class="opt" data-g="tea">블렌드티 세트</button><button class="opt" data-g="seed">씨앗팔레트</button></div>
+  <div class="guide">블렌드티: 프로그램 예약·참여 + 다감 우체국 참여 (올리 예약 확인)<br>씨앗팔레트: 프로그램 미참여 + 이벤트 참여, 또는 손목닥터9988 앱 설치·네이버 리뷰 확인</div>
   <input class="pin" id="pinIn" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN">
   <div class="row"><button class="btn ghost" id="pinCancel">취소</button><button class="btn" id="pinOk">증정 완료</button></div>
   <div class="err" id="pinErr"></div>
@@ -92,12 +92,12 @@ const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
 const LS_KEY = 'dagam_survey_v2';
 const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzjjzCxOGgwKl4bSLaoEqboEDBMRHMKlUfA9c-FH5XICszYpGs3kAwBs6lyfTRlyKup/exec';
-const GIFT = {tea:'블렌드 티 세트', seed:'씨앗 팔레트'};
+const GIFT = {tea:'블렌드티 세트', seed:'씨앗팔레트'};
 const PROG = {post:'다감 우체국', garden:'다감가든', both:'다감 우체국 · 다감가든'};
 
 /* ---------- 문항 ---------- */
 const SAT = [[5,'매우 만족'],[4,'만족'],[3,'보통'],[2,'불만족'],[1,'매우 불만족']];
-const AGR = [[1,'전혀 그렇지 않다'],[2,'그렇지 않다'],[3,'보통이다'],[4,'그렇다'],[5,'매우 그렇다']];
+const AGR = [[5,'매우 그렇다'],[4,'그렇다'],[3,'보통이다'],[2,'그렇지 않다'],[1,'전혀 그렇지 않다']];
 const isPost = a => a.q4==='post' || a.q4==='both';
 const isGarden = a => a.q4==='garden' || a.q4==='both';
 const POST_LEAD = '나만의 돌봄 방법을 생각하고 적어본 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
@@ -105,24 +105,24 @@ const GARDEN_LEAD = '다감가든에서 자연을 가까이 만나고 잠시 쉬
 const POST_STEM = '오늘 다감 우체국에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
 const GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
 const Q = [
-  {id:'q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성'],['na','응답하지 않음']]},
-  {id:'q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
-  {id:'q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
-  {id:'q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
+  {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성'],['na','응답하지 않음']]},
+  {id:'q2', no:'Q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
+  {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요'],['etc','기타 (직접 입력)']]},
+  {id:'q4', no:'Q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
 
-  {id:'p1', sec:'다감 우체국', lead:POST_LEAD, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
-  {id:'p2_1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:isPost},
-  {id:'p2_2', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:isPost},
-  {id:'p2_3', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:isPost},
-  {id:'p3', sec:'다감 우체국', type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:isPost},
-  {id:'p4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isPost},
+  {id:'p1', no:'Q1', sec:'다감 우체국', lead:POST_LEAD, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
+  {id:'p2_1', no:'Q2-1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:isPost},
+  {id:'p2_2', no:'Q2-2', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:isPost},
+  {id:'p2_3', no:'Q2-3', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:isPost},
+  {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감되는 내용이 없었어요.'를 선택해주세요.", type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:isPost},
+  {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isPost},
 
-  {id:'g1', sec:'다감가든', lead:GARDEN_LEAD, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
-  {id:'g2_1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:isGarden},
-  {id:'g2_2', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:isGarden},
-  {id:'g2_3', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:isGarden},
-  {id:'g3', sec:'다감가든', type:'single', title:'오늘 다감가든에서 가장 기억에 남는 경험은 무엇인가요?', opts:[['scent','향'],['color','색'],['touch','촉감'],['shape','모양 관찰'],['rest','쉼'],['none','특별히 없음']], when:isGarden},
-  {id:'g4', sec:'다감가든', type:'single', title:'앞으로 다감가든에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['more','더 다양한 식물과 자연 소재를 경험할 수 있으면 좋겠어요.'],['guide','자연을 어떻게 관찰하고 체험하면 좋을지 안내가 더 자세하면 좋겠어요.'],['seat','자연을 천천히 경험할 수 있도록 머무는 자리가 더 있으면 좋겠어요.'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isGarden},
+  {id:'g1', no:'Q1', sec:'다감가든', lead:GARDEN_LEAD, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
+  {id:'g2_1', no:'Q2-1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:isGarden},
+  {id:'g2_2', no:'Q2-2', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:isGarden},
+  {id:'g2_3', no:'Q2-3', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:isGarden},
+  {id:'g3', no:'Q3', sec:'다감가든', type:'single', title:'오늘 다감가든에서 가장 기억에 남는 경험은 무엇인가요?', opts:[['scent','향'],['color','색'],['touch','촉감'],['shape','모양 관찰'],['rest','쉼'],['none','특별히 없음']], when:isGarden},
+  {id:'g4', no:'Q4', sec:'다감가든', type:'single', title:'앞으로 다감가든에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['more','더 다양한 식물과 자연 소재를 경험할 수 있으면 좋겠어요.'],['guide','자연을 어떻게 관찰하고 체험하면 좋을지 안내가 더 자세하면 좋겠어요.'],['seat','자연을 천천히 경험할 수 있도록 머무는 자리가 더 있으면 좋겠어요.'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isGarden},
 
   {id:'free', sec:'자유 의견', type:'text', optional:true, title:'상시 운영 프로그램에 참여하면서 좋았던 점이나 바라는 점이 있다면 편하게 남겨주세요.',
     hint:'앞으로 새롭게 생겼으면 하는 체험도 좋아요.\n예) 손목닥터9988처럼 다감에서 경험한 웰니스 활동을 일상에서도 이어갈 수 있도록 관련 프로그램이나 실천 방법을 안내해 주면 좋겠어요.\n예) 다감가든 주변에서 헤드셋으로 음악을 들으며 참여하는 사일런트 요가(무소음 요가)를 해보고 싶어요.'}
@@ -185,14 +185,14 @@ function renderQ(){
   let body = '';
   if(q.type==='single'){
     body = `<div class="opts">${q.opts.map(([v,t]) => `<button class="opt ${A[q.id]===v?'on':''}" data-v="${v}">${esc(t)}</button>`).join('')}</div>`;
-    if(A[q.id]==='etc') body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요." value="${esc(A[q.id+'_etc']||'')}">`;
+    if(A[q.id]==='etc') body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요" value="${esc(A[q.id+'_etc']||'')}">`;
   } else {
-    body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요.">${esc(A[q.id]||'')}</textarea>`;
+    body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요">${esc(A[q.id]||'')}</textarea>`;
   }
   $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}</span>
     ${showLead?`<p class="lead">${esc(showLead)}</p>`:''}
     ${q.stem?`<p class="hint" style="margin-bottom:6px">${esc(q.stem)}</p>`:''}
-    <h2>${esc(q.title)}</h2>${q.hint?`<p class="hint">${nl(q.hint)}</p>`:''}${body}</div>`;
+    <h2>${q.no?esc(q.no)+'. ':''}${esc(q.title)}</h2>${q.hint?`<p class="hint">${nl(q.hint)}</p>`:''}${body}</div>`;
   $('#app').querySelectorAll('.opt').forEach(b => b.onclick = () => {
     const v = q.num ? Number(b.dataset.v) : b.dataset.v;
     A[q.id] = v; cleanup(); renderQ();
@@ -267,7 +267,7 @@ $('#pinOk').onclick = async () => {
   try{
     const r = await rpc('dagam_redeem', {p_code: pinCode, p_pin: pin, p_gift: pinGift});
     if(r.status==='bad_pin') $('#pinErr').textContent='PIN이 맞지 않아요.';
-    else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요. ('+fmtTime(r.redeemed_at)+').';
+    else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요 ('+fmtTime(r.redeemed_at)+').';
     else if(r.status==='ok'){
       $('#pinModal').classList.remove('on');
       try{ sessionStorage.setItem('dagam_pin', pin); }catch(e){}
@@ -301,8 +301,8 @@ async function renderStaff(){
   $('#app').innerHTML = `
     <h1>기념품 증정 현황</h1>
     <div class="stat">
-      <div><span>블렌드 티 세트 · 오늘</span><b class="${c.tea_today>c.tea_daily_limit?'over':''}">${c.tea_today} / ${c.tea_daily_limit}</b><span>누적 ${c.tea_all} / ${c.tea_total}</span></div>
-      <div><span>씨앗 팔레트 · 오늘</span><b class="${c.seed_today>c.seed_daily_limit?'over':''}">${c.seed_today} / ${c.seed_daily_limit}</b><span>누적 ${c.seed_all} / ${c.seed_total}</span></div>
+      <div><span>블렌드티 세트 · 오늘</span><b class="${c.tea_today>c.tea_daily_limit?'over':''}">${c.tea_today} / ${c.tea_daily_limit}</b><span>누적 ${c.tea_all} / ${c.tea_total}</span></div>
+      <div><span>씨앗팔레트 · 오늘</span><b class="${c.seed_today>c.seed_daily_limit?'over':''}">${c.seed_today} / ${c.seed_daily_limit}</b><span>누적 ${c.seed_all} / ${c.seed_total}</span></div>
     </div>
     <p class="small">오늘 설문 응답 ${c.resp_today}건 · 하루 한도는 내부 관리용이에요.</p>
     <div class="card" style="margin:14px 0">
@@ -347,11 +347,11 @@ async function renderAdmin(){
     <h1>설문·기념품 현황</h1>
     <div class="stat">
       <div><span>전체 응답</span><b>${rows.length}</b><span>오늘 ${c.resp_today} · 우체국 ${prog.post} · 가든 ${prog.garden} · 모두 ${prog.both}</span></div>
-      <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드 티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
+      <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
     </div>
     <button class="btn" style="width:100%;margin:6px 0 18px" id="csv">응답 전체 CSV 내려받기</button>
     <h2>날짜별</h2>
-    <table><tr><th>날짜</th><th>응답</th><th>블렌드 티</th><th>씨앗</th></tr>
+    <table><tr><th>날짜</th><th>응답</th><th>블렌드티</th><th>씨앗</th></tr>
     ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k].n}</td><td>${byDay[k].tea||0}</td><td>${byDay[k].seed||0}</td></tr>`).join('')}</table>
     <h2 style="margin-top:22px">만족도 (5점 평균 · 긍정률)</h2>
     <table><tr><th>문항</th><th>전체</th><th>우체국만</th><th>가든만</th><th>모두</th></tr>
