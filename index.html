@@ -14,6 +14,7 @@ body{font-size:18px;line-height:1.55}
 .wrap{max-width:560px;margin:0 auto;padding:20px 18px 120px}
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .brand{font-weight:900;letter-spacing:.02em;font-size:20px}
+.brand .logo{display:block;height:28px;width:auto;margin-bottom:6px}
 .brand small{display:block;font-size:12px;font-weight:600;color:var(--sub);letter-spacing:.1em}
 .prog{height:6px;background:#e9e5dd;border-radius:99px;overflow:hidden;margin:6px 0 18px}
 .prog i{display:block;height:100%;background:var(--ink);width:0;transition:width .25s}
@@ -64,13 +65,14 @@ th{background:#f1eee7}
 .giftpick .opt{text-align:center;padding:14px 6px;font-size:16px}
 .etc{width:100%;font:inherit;font-size:17px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;margin-top:8px}
 .sec{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--sub);margin-bottom:8px}
+.lead b{display:block;font-weight:700;color:#3a362f}.lead .ld{display:block;font-weight:700;color:#3a362f}.lead .ld+b{margin-top:8px}
 .lead{background:#fbf6dd;border-radius:12px;padding:12px 14px;font-size:15px;color:#4a463e;margin:0 0 14px;word-break:keep-all}
 .guide{font-size:13px;color:var(--sub);background:#f4f2ec;border-radius:10px;padding:10px 12px;margin:4px 0 8px;word-break:keep-all;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><div class="brand">다감 <small>WELLNESS LEARNING LOUNGE</small></div><div class="small" id="step"></div></header>
+  <header><div class="brand"><img class="logo" alt="다감" src="data:image/png;base64,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"><small>WELLNESS LITERACY LOUNGE</small></div><div class="small" id="step"></div></header>
   <div class="prog" id="progWrap"><i id="prog"></i></div>
   <main id="app"></main>
 </div>
@@ -105,9 +107,9 @@ const GARDEN_LEAD = '다감가든에서 자연을 가까이 만나고 잠시 쉬
 const POST_STEM = '오늘 다감 우체국에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
 const GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
 const Q = [
-  {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성'],['na','응답하지 않음']]},
+  {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성']]},
   {id:'q2', no:'Q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
-  {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요'],['etc','기타 (직접 입력)']]},
+  {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
   {id:'q4', no:'Q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
 
   {id:'p1', no:'Q1', sec:'다감 우체국', lead:POST_LEAD, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
@@ -190,8 +192,7 @@ function renderQ(){
     body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요">${esc(A[q.id]||'')}</textarea>`;
   }
   $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}</span>
-    ${showLead?`<p class="lead">${esc(showLead)}</p>`:''}
-    ${q.stem?`<p class="hint" style="margin-bottom:6px">${esc(q.stem)}</p>`:''}
+    ${(showLead||q.stem)?`<div class="lead">${showLead?`<span class="ld">${esc(showLead)}</span>`:''}${q.stem?`<b>${esc(q.stem)}</b>`:''}</div>`:''}
     <h2>${q.no?esc(q.no)+'. ':''}${esc(q.title)}</h2>${q.hint?`<p class="hint">${nl(q.hint)}</p>`:''}${body}</div>`;
   $('#app').querySelectorAll('.opt').forEach(b => b.onclick = () => {
     const v = q.num ? Number(b.dataset.v) : b.dataset.v;
