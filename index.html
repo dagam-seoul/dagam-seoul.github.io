@@ -112,14 +112,14 @@ const Q = [
   {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
   {id:'q4', no:'Q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
 
-  {id:'p1', no:'Q1', sec:'다감 우체국', lead:POST_LEAD, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
+  {id:'p1', no:'Q1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
   {id:'p2_1', no:'Q2-1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:isPost},
   {id:'p2_2', no:'Q2-2', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:isPost},
   {id:'p2_3', no:'Q2-3', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:isPost},
   {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감되는 내용이 없었어요.'를 선택해주세요.", type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:isPost},
   {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isPost},
 
-  {id:'g1', no:'Q1', sec:'다감가든', lead:GARDEN_LEAD, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
+  {id:'g1', no:'Q1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
   {id:'g2_1', no:'Q2-1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:isGarden},
   {id:'g2_2', no:'Q2-2', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:isGarden},
   {id:'g2_3', no:'Q2-3', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:isGarden},
