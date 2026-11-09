@@ -269,12 +269,13 @@ $('#pinOk').onclick = async () => {
     const r = await rpc('dagam_redeem', {p_code: pinCode, p_pin: pin, p_gift: pinGift});
     if(r.status==='bad_pin') $('#pinErr').textContent='PIN이 맞지 않아요.';
     else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요 ('+fmtTime(r.redeemed_at)+').';
+    else if(r.status==='sold_out') $('#pinErr').textContent=`${GIFT[r.gift]} ${r.slot==='am'?'오전':'오후'} 회차 수량이 모두 소진됐어요.`;
     else if(r.status==='ok'){
       $('#pinModal').classList.remove('on');
       try{ sessionStorage.setItem('dagam_pin', pin); }catch(e){}
       sheetRedeem(pinCode, r.gift, r.redeemed_at);
       const ct = r.counts, k = r.gift;
-      toast(`${GIFT[k]} 증정 완료 · 오늘 ${ct[k+'_today']}/${ct[k+'_daily_limit']}`);
+      toast(ct[k+'_'+ct.slot+'_limit']>0 ? `${GIFT[k]} 증정 완료 · ${ct.slot==='am'?'오전':'오후'} ${ct[k+'_'+ct.slot]}/${ct[k+'_'+ct.slot+'_limit']}` : `${GIFT[k]} 증정 완료 · 누적 ${ct[k+'_all']}/${ct[k+'_total']}`);
       if(afterRedeem) afterRedeem(); else showCoupon(pinCode);
     } else $('#pinErr').textContent='처리할 수 없는 번호예요.';
   }catch(e){ $('#pinErr').textContent='전송 실패. 연결을 확인해 주세요.'; }
@@ -302,10 +303,13 @@ async function renderStaff(){
   $('#app').innerHTML = `
     <h1>기념품 증정 현황</h1>
     <div class="stat">
-      <div><span>블렌드티 세트 · 오늘</span><b class="${c.tea_today>c.tea_daily_limit?'over':''}">${c.tea_today} / ${c.tea_daily_limit}</b><span>누적 ${c.tea_all} / ${c.tea_total}</span></div>
-      <div><span>씨앗팔레트 · 오늘</span><b class="${c.seed_today>c.seed_daily_limit?'over':''}">${c.seed_today} / ${c.seed_daily_limit}</b><span>누적 ${c.seed_all} / ${c.seed_total}</span></div>
+      ${['tea','seed'].map(k=>{ const cur=c.slot, n=c[k+'_'+cur], lim=c[k+'_'+cur+'_limit'];
+        if(!(c[k+'_am_limit']>0 || c[k+'_pm_limit']>0))
+          return `<div><span>${GIFT[k]} · 오늘</span><b>${c[k+'_today']}개</b><span>누적 ${c[k+'_all']} / ${c[k+'_total']}<br>회차 한도 없음</span></div>`;
+        return `<div><span>${GIFT[k]} · ${cur==="am"?"오전":"오후"} 회차</span><b class="${n>=lim?'over':''}">${n} / ${lim}</b>
+        <span>오전 ${c[k+'_am']}/${c[k+'_am_limit']} · 오후 ${c[k+'_pm']}/${c[k+'_pm_limit']}<br>누적 ${c[k+'_all']} / ${c[k+'_total']}</span></div>`; }).join('')}
     </div>
-    <p class="small">오늘 설문 응답 ${c.resp_today}건 · 하루 한도는 내부 관리용이에요.</p>
+    <p class="small">오늘 설문 응답 ${c.resp_today}건 · ${c.cutoff}부터 오후 회차 · ${c.block==='on'?'씨앗팔레트는 회차 한도 도달 시 증정이 막히고, 매일 0부터 다시 세요.':'한도는 표시만 돼요.'}</p>
     <div class="card" style="margin:14px 0">
       <h2>응답 번호로 처리</h2><p class="hint">참여자 화면이 닫혔을 때 번호 5자리를 입력하세요.</p>
       <input class="codein" id="codeIn" maxlength="5" autocomplete="off">
