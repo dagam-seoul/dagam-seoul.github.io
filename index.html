@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>다감 우체국 · 다감가든 만족도 조사</title>
+<title>웰니스 학습라운지 다감 만족도 조사</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
@@ -67,6 +67,13 @@ th{background:#f1eee7}
 .sec{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--sub);margin-bottom:8px}
 .lead b{display:block;font-weight:700;color:#3a362f}.lead .ld{display:block;font-weight:700;color:#3a362f}.lead .ld+b{margin-top:8px}
 .lead{background:#fbf6dd;border-radius:12px;padding:12px 14px;font-size:15px;color:#4a463e;margin:0 0 14px;word-break:keep-all}
+.leadimg{display:block;width:100%;height:170px;object-fit:cover;border-radius:12px;margin:0 0 10px}
+.brandbox{display:flex;gap:12px;align-items:center;margin-bottom:8px}.brandbox img{width:64px;height:auto;flex:0 0 auto;border-radius:6px}
+.brandbox .bt{display:block;margin-bottom:4px}.brandbox span{display:block;font-weight:700;color:#3a362f}.brandbox+b{margin-top:8px}
+.opts.multi .opt{padding-left:48px;position:relative;font-size:17px}
+.opts.multi .opt::before{content:'';position:absolute;left:16px;top:50%;width:20px;height:20px;margin-top:-10px;border:2px solid var(--line);border-radius:5px;background:#fff}
+.opts.multi .opt.on::before{background:var(--ink);border-color:var(--ink)}
+.opts.multi .opt.on::after{content:'';position:absolute;left:23px;top:50%;width:6px;height:11px;margin-top:-8px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
 .guide{font-size:13px;color:var(--sub);background:#f4f2ec;border-radius:10px;padding:10px 12px;margin:4px 0 8px;word-break:keep-all;line-height:1.5}
 </style>
 </head>
@@ -92,39 +99,96 @@ th{background:#f1eee7}
 <script>
 const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
-const LS_KEY = 'dagam_survey_v2';
+const LS_KEY = 'dagam_survey_v3';
 const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzjjzCxOGgwKl4bSLaoEqboEDBMRHMKlUfA9c-FH5XICszYpGs3kAwBs6lyfTRlyKup/exec';
 const GIFT = {tea:'블렌드티 세트', seed:'씨앗팔레트'};
-const PROG = {post:'다감 우체국', garden:'다감가든', both:'다감 우체국 · 다감가든'};
+const PROG = {post:'다감 우체국', garden:'다감가든', both:'다감 우체국 · 다감가든', none:'다감 일반 공간'};
 
-/* ---------- 문항 ---------- */
+/* ---------- 문항 (v3 통합 만족도 조사 · 시립대 + 플랜백) ---------- */
+const SURVEY_VER = 3;
 const SAT = [[5,'매우 만족'],[4,'만족'],[3,'보통'],[2,'불만족'],[1,'매우 불만족']];
 const AGR = [[5,'매우 그렇다'],[4,'그렇다'],[3,'보통이다'],[2,'그렇지 않다'],[1,'전혀 그렇지 않다']];
 const isPost = a => a.q4==='post' || a.q4==='both';
 const isGarden = a => a.q4==='garden' || a.q4==='both';
-const POST_LEAD = '나만의 돌봄 방법을 생각하고 적어본 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
-const GARDEN_LEAD = '다감가든에서 자연을 가까이 만나고 잠시 쉬어간 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
-const POST_STEM = '오늘 다감 우체국에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
-const GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
+const IMG_POST = 'https://cdn.imweb.me/upload/S202609297d4d893eb68a2/cffb4da9ad33a.png';
+const IMG_GARDEN = 'https://cdn.imweb.me/upload/S202609297d4d893eb68a2/b9f10d2c658e0.png';
+const LOGO_DAGAM = 'data:image/png;base64,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';
+const ENV_STEM = '다음은 웰니스 학습라운지 다감의 시설과 이용 환경에 대한 평가입니다. 가장 가까운 답을 골라주세요.';
+const POST_STEM = '다감 우체국에서의 경험을 떠올리며 가장 가까운 답을 골라주세요.';
+const GARDEN_STEM = '다감가든에서의 경험을 떠올리며 가장 가까운 답을 골라주세요.';
+const BRAND_STEM = '웰니스 학습라운지 다감 전반을 떠올리며 가장 가까운 답을 골라주세요.';
+const env = (n, id, tag, title, extra) => ({id, no:'Q'+n, sec:'이용 환경 · 편의성', tag, stem:ENV_STEM, type:'single', num:true, title, opts: extra ? [...AGR, extra] : AGR});
 const Q = [
+  {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성']]},
+  {id:'q2', no:'Q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
+
+  env(1,'e1','입구 접근성','입구를 쉽게 찾을 수 있었습니다.'),
+  env(2,'e2','안내 및 동선','내·외부 안내표시와 이동 동선이 잘 구비되어 있었습니다.'),
+  env(3,'e3','가구 착좌감','의자와 테이블이 앉고 일어서기에 편했습니다.'),
+  env(4,'e4','공간 구획','혼자 또는 여럿이 머무는 공간 구분이 적절했습니다.'),
+  env(5,'e5','기기 사용','헤드셋, 턴테이블 등 시설 내 기기를 이용하기 쉬웠습니다.'),
+  env(6,'e6','실내 쾌적성','실내 조명, 온도, 공기 상태가 쾌적했습니다.'),
+  env(7,'e7','물품 청결','공용 물품(헤드셋 등)이 깨끗하게 관리되어 있었습니다.'),
+  env(8,'e8','예약 편의','예약 및 체크인 과정이 편리했습니다.', ['na','해당 없음 (예약 없이 방문)']),
+  env(9,'e9','직원 응대','도움이 필요할 때 직원의 안내를 바로 받을 수 있었습니다.'),
+  env(10,'e10','공간 안전성','공간 이동 시 안전하다고 느꼈습니다.'),
+  env(11,'e11','정서적 안정','머무는 동안 마음의 편안함을 느꼈습니다.'),
+
+  {id:'q4', no:'Q1', sec:'이벤트 공간 체험', type:'single', title:'웰니스 학습라운지 다감에서 체험하신 이벤트 공간은 어디인가요?',
+    opts:[['post','다감 우체국만 체험했어요.'],['garden','다감가든만 체험했어요.'],['both','두 공간 모두 체험했어요.'],['none','이벤트 공간 체험 없이 다감 일반 공간만 이용했어요.']]},
+
+  {id:'p1', no:'Q1', sec:'다감 우체국', lead:{img:IMG_POST, alt:'다감 우체국'}, stem:POST_STEM, type:'single', num:true, title:'다감 우체국에서 나에게 필요한 돌봄 방법을 생각하고 적어본 시간은 유익했나요?', opts:AGR, when:isPost},
+  {id:'p2', no:'Q2', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'다감 우체국에서 작성한 돌봄 방법을 일상에서도 실천해보고 싶어졌나요?', opts:AGR, when:isPost},
+  {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감 내용 없음'을 선택해주세요.", type:'single', title:'다감 우체국에서 본 다른 사람의 편지 중 가장 공감되는 돌봄 방법은 어떤 감각/활동이었나요?',
+    opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감 내용 없음'],['unread','편지 읽지 않음']], when:isPost},
+  {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'다감 우체국에서 어떤 점이 더 좋아지면 좋을까요?',
+    opts:[['guide','나만의 돌봄 가이드/예시 보완'],['env','편지를 편히 쓰는 환경 조성'],['none','개선점 없음'],['etc','기타 (직접 입력)']], when:isPost},
+
+  {id:'g1', no:'Q1', sec:'다감가든', lead:{img:IMG_GARDEN, alt:'다감가든'}, stem:GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등 다양한 감각에 집중할 수 있었나요?', opts:AGR, when:isGarden},
+  {id:'g2', no:'Q2', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었나요?', opts:AGR, when:isGarden},
+  {id:'g3', no:'Q3', sec:'다감가든', type:'single', title:'다감가든에서 가장 기억에 남는 경험은 무엇인가요?',
+    opts:[['scent','자연 향'],['color','식물 색'],['touch','자연 촉감'],['observe','식물 관찰'],['rest','자연 속 휴식'],['none','기억 남는 것 없음']], when:isGarden},
+  {id:'g4', no:'Q4', sec:'다감가든', type:'single', title:'다감가든에서 어떤 점이 더 좋아지면 좋을까요?',
+    opts:[['more','식물/소재 다양화'],['guide','관찰/체험 가이드 보완'],['seat','천천히 쉴 환경 조성'],['none','개선점 없음'],['etc','기타 (직접 입력)']], when:isGarden},
+
+  {id:'b1', no:'Q1', sec:'브랜드 경험 · 종합 평가', tag:'브랜드 정체성', lead:{brand:true}, stem:BRAND_STEM, type:'single', num:true, title:'다른 평생학습공간과 차별화된 다감만의 분위기와 감각 요소(다감다움)를 느낄 수 있었습니다.', opts:AGR},
+  {id:'b2', no:'Q2', sec:'브랜드 경험 · 종합 평가', tag:'전반적 만족도', stem:BRAND_STEM, type:'single', num:true, title:'웰니스 학습라운지 다감 이용 및 체험 프로그램 전반에 만족하십니까?', opts:SAT},
+  {id:'b3', no:'Q3', sec:'브랜드 경험 · 종합 평가', tag:'재방문 및 추천 의향', stem:BRAND_STEM, type:'single', num:true, title:'앞으로 웰니스 학습라운지 다감을 다시 방문하거나 주변에 추천하시겠습니까?', opts:AGR},
+
+  {id:'f1', no:'Q1', sec:'향후 프로그램 · 제언', type:'multi', stem:'여러 개를 골라도 괜찮아요.', title:'앞으로 웰니스 학습라운지 다감에서 참여해보고 싶은 특화 프로그램 영역은 무엇인가요?',
+    opts:[['vital','활력 프로그램: 신체적 활력을 북돋는 가벼운 운동 및 기초체력·에너지 회복 활동'],
+          ['heal','힐링 프로그램: 향기, 소리 등 감각 기반 치유 요소를 활용한 스트레스 해소 및 감정 정화'],
+          ['art','아트 프로그램: 미술·예술 창작 및 표현 활동을 통한 자아 성찰과 자기 돌봄'],
+          ['mind','마음상담 프로그램: 정서 코칭, 비언어적 심리상담, 집단 공감 대화를 통한 마음 회복'],
+          ['smart','스마트 웰니스 프로그램: AI 건강 측정 및 디지털 건강 기기 활용 등 스마트 자기관리 활동'],
+          ['etc','기타 (직접 입력)']]},
+  {id:'free', no:'Q2', sec:'향후 프로그램 · 제언', type:'text', optional:true, title:"'웰니스 학습라운지 다감'에서 좋았던 점, 아쉬웠던 점, 또는 바라는 점이 있다면 자유롭게 남겨주세요."}
+];
+
+/* 이전 이벤트 만족도 조사(v2, ~11/13) 문항: 관리자 CSV 내려받기용 */
+const OLD_POST_LEAD = '나만의 돌봄 방법을 생각하고 적어본 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
+const OLD_GARDEN_LEAD = '다감가든에서 자연을 가까이 만나고 잠시 쉬어간 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
+const OLD_POST_STEM = '오늘 다감 우체국에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
+const OLD_GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
+const Q_OLD = [
   {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성']]},
   {id:'q2', no:'Q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
   {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
   {id:'q4', no:'Q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
 
-  {id:'p1', no:'Q1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
-  {id:'p2_1', no:'Q2-1', sec:'다감 우체국', lead:POST_LEAD, stem:POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:isPost},
-  {id:'p2_2', no:'Q2-2', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:isPost},
-  {id:'p2_3', no:'Q2-3', sec:'다감 우체국', stem:POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:isPost},
-  {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감되는 내용이 없었어요.'를 선택해주세요.", type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:isPost},
-  {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isPost},
+  {id:'p1', no:'Q1', sec:'다감 우체국', lead:OLD_POST_LEAD, stem:OLD_POST_STEM, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
+  {id:'p2_1', no:'Q2-1', sec:'다감 우체국', lead:OLD_POST_LEAD, stem:OLD_POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
+  {id:'p2_2', no:'Q2-2', sec:'다감 우체국', stem:OLD_POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
+  {id:'p2_3', no:'Q2-3', sec:'다감 우체국', stem:OLD_POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
+  {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감되는 내용이 없었어요.'를 선택해주세요.", type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:a=>a.q4==='post'||a.q4==='both'},
+  {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:a=>a.q4==='post'||a.q4==='both'},
 
-  {id:'g1', no:'Q1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
-  {id:'g2_1', no:'Q2-1', sec:'다감가든', lead:GARDEN_LEAD, stem:GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:isGarden},
-  {id:'g2_2', no:'Q2-2', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:isGarden},
-  {id:'g2_3', no:'Q2-3', sec:'다감가든', stem:GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:isGarden},
-  {id:'g3', no:'Q3', sec:'다감가든', type:'single', title:'오늘 다감가든에서 가장 기억에 남는 경험은 무엇인가요?', opts:[['scent','향'],['color','색'],['touch','촉감'],['shape','모양 관찰'],['rest','쉼'],['none','특별히 없음']], when:isGarden},
-  {id:'g4', no:'Q4', sec:'다감가든', type:'single', title:'앞으로 다감가든에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['more','더 다양한 식물과 자연 소재를 경험할 수 있으면 좋겠어요.'],['guide','자연을 어떻게 관찰하고 체험하면 좋을지 안내가 더 자세하면 좋겠어요.'],['seat','자연을 천천히 경험할 수 있도록 머무는 자리가 더 있으면 좋겠어요.'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:isGarden},
+  {id:'g1', no:'Q1', sec:'다감가든', lead:OLD_GARDEN_LEAD, stem:OLD_GARDEN_STEM, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
+  {id:'g2_1', no:'Q2-1', sec:'다감가든', lead:OLD_GARDEN_LEAD, stem:OLD_GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
+  {id:'g2_2', no:'Q2-2', sec:'다감가든', stem:OLD_GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
+  {id:'g2_3', no:'Q2-3', sec:'다감가든', stem:OLD_GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
+  {id:'g3', no:'Q3', sec:'다감가든', type:'single', title:'오늘 다감가든에서 가장 기억에 남는 경험은 무엇인가요?', opts:[['scent','향'],['color','색'],['touch','촉감'],['shape','모양 관찰'],['rest','쉼'],['none','특별히 없음']], when:a=>a.q4==='garden'||a.q4==='both'},
+  {id:'g4', no:'Q4', sec:'다감가든', type:'single', title:'앞으로 다감가든에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['more','더 다양한 식물과 자연 소재를 경험할 수 있으면 좋겠어요.'],['guide','자연을 어떻게 관찰하고 체험하면 좋을지 안내가 더 자세하면 좋겠어요.'],['seat','자연을 천천히 경험할 수 있도록 머무는 자리가 더 있으면 좋겠어요.'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:a=>a.q4==='garden'||a.q4==='both'},
 
   {id:'free', sec:'자유 의견', type:'text', optional:true, title:'상시 운영 프로그램에 참여하면서 좋았던 점이나 바라는 점이 있다면 편하게 남겨주세요.',
     hint:'앞으로 새롭게 생겼으면 하는 체험도 좋아요.\n예) 손목닥터9988처럼 다감에서 경험한 웰니스 활동을 일상에서도 이어갈 수 있도록 관련 프로그램이나 실천 방법을 안내해 주면 좋겠어요.\n예) 다감가든 주변에서 헤드셋으로 음악을 들으며 참여하는 사일런트 요가(무소음 요가)를 해보고 싶어요.'}
@@ -148,15 +212,15 @@ function fmtTime(t){ if(!t) return ''; return new Date(t).toLocaleString('ko-KR'
 function ansText(q, a){
   const v = a[q.id]; if(v===undefined || v===null || v==='') return '';
   if(q.type==='text') return v;
-  const o = q.opts.find(o => o[0]===v); let t = o ? o[1] : v;
-  if(v==='etc') t = '기타: ' + (a[q.id+'_etc'] || '');
-  return t;
+  const lab = x => { if(x==='etc') return '기타: ' + (a[q.id+'_etc'] || ''); const o = q.opts.find(o => o[0]===x); return o ? o[1] : x; };
+  if(Array.isArray(v)) return v.map(lab).join(' / ');
+  return lab(v);
 }
 
 /* ---------- 구글시트 ---------- */
 function sheetPost(obj){ if(!SHEET_WEBHOOK) return; try{ fetch(SHEET_WEBHOOK, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(obj)}).catch(()=>{}); }catch(e){} }
 function sheetResponse(code){
-  const head = ['응답시각','교환권', ...Q.map(q => q.id.toUpperCase().replace('_','-')+' '+q.title)];
+  const head = ['응답시각','교환권', ...Q.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
   const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), code, ...Q.map(q => ansText(q, A))];
   sheetPost({type:'response', headers:head, row});
 }
@@ -170,10 +234,10 @@ function cleanup(){ const ids = new Set(visible().map(q=>q.id)); Object.keys(A).
 function renderIntro(){
   $('#nav').style.display=''; $('#progWrap').style.visibility='hidden'; $('#step').textContent='';
   $('#app').innerHTML = `<div class="card">
-    <h1>다감 우체국 · 다감가든<br>만족도 조사</h1>
-    <p>안녕하세요! 오늘 다감 우체국 또는 다감가든에서 어떤 시간을 보내셨나요?</p>
-    <p>좋았던 경험도, 조금 아쉬웠던 부분도 편하게 들려주세요. 여러분의 의견은 두 공간을 더 좋게 만들고, 새로운 상시 체험을 준비하는 데 활용하겠습니다.</p>
-    <p class="small">약 3분 · 이름과 연락처는 받지 않는 익명 조사예요.</p>
+    <h1>웰니스 학습라운지 다감<br>만족도 조사</h1>
+    <p>안녕하세요! 웰니스 학습라운지 다감에서 보낸 시간은 어떠셨나요?</p>
+    <p>시설과 이용 환경, 이벤트 공간(다감 우체국·다감가든) 체험, 앞으로 바라는 프로그램에 대한 의견을 편하게 들려주세요. 여러분의 의견은 다감을 더 편안하고 좋은 공간으로 만드는 데 활용하겠습니다.</p>
+    <p class="small">약 5분 · 이름과 연락처는 받지 않는 익명 조사예요.</p>
   </div>`;
   $('#back').style.visibility='hidden'; $('#next').textContent='시작하기'; $('#next').disabled=false;
 }
@@ -185,18 +249,34 @@ function renderQ(){
   $('#step').textContent = `${idx+1} / ${vs.length}`;
   const showLead = q.sec !== (prev && prev.sec) && (q.lead || null);
   let body = '';
-  if(q.type==='single'){
-    body = `<div class="opts">${q.opts.map(([v,t]) => `<button class="opt ${A[q.id]===v?'on':''}" data-v="${v}">${esc(t)}</button>`).join('')}</div>`;
-    if(A[q.id]==='etc') body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요" value="${esc(A[q.id+'_etc']||'')}">`;
+  const cur = A[q.id];
+  const isOn = v => q.type==='multi' ? (Array.isArray(cur) && cur.includes(v)) : String(cur)===String(v);
+  const hasEtc = q.type==='multi' ? isOn('etc') : cur==='etc';
+  if(q.type==='single' || q.type==='multi'){
+    body = `<div class="opts ${q.type==='multi'?'multi':''}">${q.opts.map(([v,t]) => `<button class="opt ${isOn(v)?'on':''}" data-v="${v}">${esc(t)}</button>`).join('')}</div>`;
+    if(hasEtc) body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요" value="${esc(A[q.id+'_etc']||'')}">`;
   } else {
     body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요">${esc(A[q.id]||'')}</textarea>`;
   }
-  $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}</span>
-    ${(showLead||q.stem)?`<div class="lead">${showLead?`<span class="ld">${esc(showLead)}</span>`:''}${q.stem?`<b>${esc(q.stem)}</b>`:''}</div>`:''}
+  let leadHtml = '';
+  if(showLead && showLead.img) leadHtml = `<img class="leadimg" src="${showLead.img}" alt="${esc(showLead.alt||'')}">`;
+  if(showLead && showLead.brand) leadHtml = `<div class="brandbox"><img src="${LOGO_DAGAM}" alt="다감 로고"><div><b class="bt">💡 '웰니스 학습라운지 다감'이란?</b><span>[다감] 무뎌진 다양한 감각(多感)을 다시 깨우며 '다시, 감각하는 삶'으로, 시민 삶의 질을 높이는 공간</span></div></div>`;
+  if(typeof showLead === 'string') leadHtml = `<span class="ld">${esc(showLead)}</span>`;
+  $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}${q.tag?' · '+esc(q.tag):''}</span>
+    ${(showLead && showLead.img) ? leadHtml : ''}
+    ${((showLead && !showLead.img)||q.stem)?`<div class="lead">${(showLead && !showLead.img)?leadHtml:''}${q.stem?`<b>${esc(q.stem)}</b>`:''}</div>`:''}
     <h2>${q.no?esc(q.no)+'. ':''}${esc(q.title)}</h2>${q.hint?`<p class="hint">${nl(q.hint)}</p>`:''}${body}</div>`;
   $('#app').querySelectorAll('.opt').forEach(b => b.onclick = () => {
-    const v = q.num ? Number(b.dataset.v) : b.dataset.v;
-    A[q.id] = v; cleanup(); renderQ();
+    const raw = b.dataset.v;
+    if(q.type==='multi'){
+      const arr = Array.isArray(A[q.id]) ? A[q.id].slice() : [];
+      const i = arr.indexOf(raw); if(i>=0) arr.splice(i,1); else arr.push(raw);
+      if(arr.length) A[q.id] = arr; else delete A[q.id];
+      if(!arr.includes('etc')) delete A[q.id+'_etc'];
+      renderQ(); if(raw==='etc' && i<0){ const e=$('#etcIn'); if(e) e.focus(); } return;
+    }
+    const v = (q.num && /^\d+$/.test(raw)) ? Number(raw) : raw;
+    A[q.id] = v; if(v!=='etc') delete A[q.id+'_etc']; cleanup(); renderQ();
     if(v==='etc'){ const e=$('#etcIn'); if(e) e.focus(); return; }
     setTimeout(() => { const vv = visible(); if(vv[idx]===q && idx < vv.length-1) go(1); }, 220);
   });
@@ -204,7 +284,7 @@ function renderQ(){
   const e = $('#etcIn'); if(e) e.oninput = () => { A[q.id+'_etc'] = e.value; };
   $('#back').style.visibility='visible';
   $('#next').textContent = idx === vs.length-1 ? '제출하기' : '다음';
-  $('#next').disabled = !(q.optional || (A[q.id] !== undefined && A[q.id] !== ''));
+  $('#next').disabled = !(q.optional || (A[q.id] !== undefined && A[q.id] !== '' && !(Array.isArray(A[q.id]) && !A[q.id].length)));
 }
 
 function go(d){
@@ -217,19 +297,30 @@ function go(d){
 
 async function submit(){
   if(sending) return; sending = true; $('#next').disabled = true; $('#next').textContent='보내는 중…';
-  cleanup();
+  cleanup(); A.v = SURVEY_VER;
   try{
     const res = await rpc('dagam_submit', {p_device: deviceId(), p_answers: A});
     save({code: res.code});
     if(!res.existing) sheetResponse(res.code);
-    showCoupon(res.code);
+    showDone(false);
   }catch(err){
     sending = false; $('#next').disabled=false; $('#next').textContent='다시 제출하기';
     toast('전송에 실패했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
   }
 }
 
-/* ---------- 완료 · 교환권 ---------- */
+/* ---------- 완료 ---------- */
+function showDone(again){
+  $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='';
+  $('#app').innerHTML = `<div class="card" style="text-align:center;padding:36px 22px">
+    <div style="font-size:44px;line-height:1;margin-bottom:12px">💌</div>
+    <h1 style="margin-bottom:10px">설문 완료</h1>
+    <p style="margin:0">${again?'이미 설문에 참여해 주셨어요.<br>':''}소중한 의견을 남겨주셔서 감사합니다!</p>
+    <p class="small" style="margin-top:14px">남겨주신 의견은 웰니스 학습라운지 다감을<br>더 편안하고 좋은 공간으로 만드는 데 활용하겠습니다.</p>
+  </div>`;
+}
+
+/* ---------- (이전) 교환권 · 스태프 증정용 ---------- */
 async function showCoupon(code){
   $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='';
   let c = null; try{ c = await rpc('dagam_coupon', {p_code: code}); }catch(e){}
@@ -339,48 +430,59 @@ async function renderAdmin(){
   if(!pin) return pinGate('dagam_admin', 'dagam_admin_pin', renderAdmin);
   let d; try{ d = await rpc('dagam_admin', {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
   if(d.status!=='ok'){ try{ sessionStorage.removeItem('dagam_admin_pin'); }catch(e){} return renderAdmin(); }
-  const rows = d.rows, c = d.counts;
+  const all = d.rows, c = d.counts;
+  const rows = all.filter(r => r.answers && r.answers.v === SURVEY_VER);
+  const oldRows = all.filter(r => !(r.answers && r.answers.v === SURVEY_VER));
   const day = t => new Date(t).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit'});
   const byDay = {};
-  rows.forEach(r => { const k = day(r.created_at); byDay[k] = byDay[k] || {n:0,tea:0,seed:0}; byDay[k].n++;
+  all.forEach(r => { const k = day(r.created_at); byDay[k] = byDay[k] || {n:0,tea:0,seed:0}; byDay[k].n++;
     if(r.redeemed_at && r.gift){ const k2 = day(r.redeemed_at); byDay[k2] = byDay[k2] || {n:0,tea:0,seed:0}; byDay[k2][r.gift]++; } });
-  const prog = {post:0, garden:0, both:0}; rows.forEach(r => { if(prog[r.answers.q4]!==undefined) prog[r.answers.q4]++; });
+  const prog = {post:0, garden:0, both:0, none:0}; rows.forEach(r => { if(prog[r.answers.q4]!==undefined) prog[r.answers.q4]++; });
   const avg = (id, grp) => { const v = rows.filter(r => !grp || r.answers.q4===grp).map(r => r.answers[id]).filter(x => typeof x==='number');
     if(!v.length) return '–'; return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(2)+' · '+Math.round(v.filter(x=>x>=4).length/v.length*100)+'% ('+v.length+')'; };
-  const numIds = Q.filter(q => q.num).map(q => q.id);
+  const label = q => `[${esc(q.sec)}] ${esc(q.no||'')}${q.tag?' '+esc(q.tag):''} ${esc(q.title)}`;
+  const numQs = Q.filter(q => q.num);
+  const f1 = QI.f1, f1n = {}; rows.forEach(r => (r.answers.f1||[]).forEach(v => f1n[v] = (f1n[v]||0)+1));
   $('#app').innerHTML = `
     <h1>설문·기념품 현황</h1>
     <div class="stat">
-      <div><span>전체 응답</span><b>${rows.length}</b><span>오늘 ${c.resp_today} · 우체국 ${prog.post} · 가든 ${prog.garden} · 모두 ${prog.both}</span></div>
+      <div><span>통합 만족도 조사 응답</span><b>${rows.length}</b><span>우체국만 ${prog.post} · 가든만 ${prog.garden} · 모두 ${prog.both} · 체험 없음 ${prog.none}<br>이전 이벤트 설문 ${oldRows.length}건 · 오늘 전체 ${c.resp_today}</span></div>
       <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
     </div>
-    <button class="btn" style="width:100%;margin:6px 0 18px" id="csv">응답 전체 CSV 내려받기</button>
+    <button class="btn" style="width:100%;margin:6px 0 8px" id="csv">통합 만족도 조사 CSV 내려받기</button>
+    <button class="btn ghost" style="width:100%;margin:0 0 18px" id="csvOld">이전 이벤트 만족도 조사 CSV (${oldRows.length}건)</button>
     <h2>날짜별</h2>
     <table><tr><th>날짜</th><th>응답</th><th>블렌드티</th><th>씨앗</th></tr>
     ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k].n}</td><td>${byDay[k].tea||0}</td><td>${byDay[k].seed||0}</td></tr>`).join('')}</table>
-    <h2 style="margin-top:22px">만족도 (5점 평균 · 긍정률)</h2>
-    <table><tr><th>문항</th><th>전체</th><th>우체국만</th><th>가든만</th><th>모두</th></tr>
-    ${numIds.map(id => `<tr><td>${id.toUpperCase().replace('_','-')} ${esc(QI[id].title)}</td><td>${avg(id)}</td><td>${avg(id,'post')}</td><td>${avg(id,'garden')}</td><td>${avg(id,'both')}</td></tr>`).join('')}
+    <h2 style="margin-top:22px">5점 척도 문항 (평균 · 긍정률)</h2>
+    <table><tr><th>문항</th><th>전체</th><th>우체국만</th><th>가든만</th><th>모두</th><th>체험 없음</th></tr>
+    ${numQs.map(q => `<tr><td>${label(q)}</td><td>${avg(q.id)}</td><td>${avg(q.id,'post')}</td><td>${avg(q.id,'garden')}</td><td>${avg(q.id,'both')}</td><td>${avg(q.id,'none')}</td></tr>`).join('')}
     </table>
-    <p class="small">만족도 5점 = 매우 만족·매우 그렇다. 긍정률 = 4~5점 비율. 설정(PIN·하루 한도·총수량)은 Supabase dagam_settings 표에서 바꿉니다.</p>`;
-  $('#csv').onclick = () => {
-    const head = ['응답시각','응답번호','기념품','증정시각', ...Q.map(q => q.id.toUpperCase().replace('_','-')+' '+q.title)];
-    const lines = [head, ...rows.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), r.coupon_code, GIFT[r.gift]||'',
-      r.redeemed_at ? new Date(r.redeemed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '', ...Q.map(q => ansText(q, r.answers))])]
+    <h2 style="margin-top:22px">참여 희망 프로그램 (중복)</h2>
+    <table><tr><th>영역</th><th>선택 수</th><th>응답자 대비</th></tr>
+    ${f1.opts.map(([v,t]) => `<tr><td>${esc(t.split(':')[0])}</td><td>${f1n[v]||0}</td><td>${rows.length?Math.round((f1n[v]||0)/rows.length*100):0}%</td></tr>`).join('')}
+    </table>
+    <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다. 설정(PIN·수량)은 Supabase dagam_settings 표에서 바꿉니다.</p>`;
+  const toCsv = (list, QS, name) => {
+    const head = ['응답시각','응답번호','기념품','증정시각', ...QS.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
+    const lines = [head, ...list.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), r.coupon_code, GIFT[r.gift]||'',
+      r.redeemed_at ? new Date(r.redeemed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '', ...QS.map(q => ansText(q, r.answers))])]
       .map(row => row.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿'+lines], {type:'text/csv;charset=utf-8'}));
-    a.download = 'dagam_survey_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff'+lines], {type:'text/csv;charset=utf-8'}));
+    a.download = name+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
   };
+  $('#csv').onclick = () => toCsv(rows, Q, 'dagam_통합만족도');
+  $('#csvOld').onclick = () => toCsv(oldRows, Q_OLD, 'dagam_이전이벤트설문');
 }
 
 /* ---------- 시작 ---------- */
 $('#next').onclick = () => go(1);
 $('#back').onclick = () => go(-1);
 const qs = location.search;
-if(qs.includes('reset')){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem('dagam_survey_v1'); }catch(e){} location.replace(location.pathname); }
+if(qs.includes('reset')){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem('dagam_survey_v2'); localStorage.removeItem('dagam_survey_v1'); }catch(e){} location.replace(location.pathname); }
 else if(qs.includes('admin')) renderAdmin();
 else if(qs.includes('staff')) renderStaff();
-else { const s = store(); if(s.code) showCoupon(s.code); else renderIntro(); }
+else { const s = store(); if(s.code) showDone(true); else renderIntro(); }
 </script>
 </body>
 </html>
