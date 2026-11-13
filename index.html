@@ -293,12 +293,16 @@ function pinGate(fn, key, next){
   };
 }
 /* ---------- 관리자 화면 (?admin) ---------- */
-async function renderAdmin(){
-  $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='관리자';
-  let pin = null; try{ pin = sessionStorage.getItem('dagam3_admin_pin'); }catch(e){}
-  if(!pin) return pinGate('dagam3_admin', 'dagam3_admin_pin', renderAdmin);
-  let d; try{ d = await rpc('dagam3_admin', {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
-  if(d.status!=='ok'){ try{ sessionStorage.removeItem('dagam3_admin_pin'); }catch(e){} return renderAdmin(); }
+const renderAdmin = () => renderView('admin');
+const renderStaff = () => renderView('staff');
+async function renderView(mode){
+  const isAdmin = mode==='admin', fn = isAdmin ? 'dagam3_admin' : 'dagam3_staff', key = isAdmin ? 'dagam3_admin_pin' : 'dagam3_staff_pin';
+  const again = () => renderView(mode);
+  $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent = isAdmin ? '관리자' : '스태프';
+  let pin = null; try{ pin = sessionStorage.getItem(key); }catch(e){}
+  if(!pin) return pinGate(fn, key, again);
+  let d; try{ d = await rpc(fn, {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
+  if(d.status!=='ok'){ try{ sessionStorage.removeItem(key); }catch(e){} return again(); }
   const all = d.rows, c = d.counts;
   const rows = all;
   const day = t => new Date(t).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit'});
@@ -311,12 +315,18 @@ async function renderAdmin(){
   const numQs = Q.filter(q => q.num);
   const f1 = QI.f1, f1n = {}; rows.forEach(r => (r.answers.f1||[]).forEach(v => f1n[v] = (f1n[v]||0)+1));
   $('#app').innerHTML = `
-    <h1>설문·기념품 현황</h1>
+    <h1>만족도 조사 현황</h1>
     <div class="stat">
       <div><span>전체 응답</span><b>${rows.length}</b><span>오늘 ${c.resp_today}</span></div>
       <div><span>이벤트 공간 체험</span><b>${prog.post+prog.garden+prog.both}</b><span>우체국만 ${prog.post} · 가든만 ${prog.garden} · 모두 ${prog.both} · 체험 없음 ${prog.none}</span></div>
     </div>
-    <button class="btn" style="width:100%;margin:6px 0 18px" id="csv">응답 전체 CSV 내려받기</button>
+    <button class="btn" style="width:100%;margin:6px 0 8px" id="csv">응답 전체 CSV 내려받기</button>
+    <button class="staffbtn" style="margin:0 0 18px" id="reload">새로고침</button>
+    <h2>최근 응답</h2>
+    <div style="overflow-x:auto"><table><tr><th>응답시각</th><th>성별·연령</th><th>이벤트 공간</th><th>전반적 만족도</th><th>자유 의견</th></tr>
+    ${rows.slice().reverse().slice(0,30).map(r => `<tr><td>${fmtTime(r.created_at)}</td><td>${esc(ansText(QI.q1,r.answers))} · ${esc(ansText(QI.q2,r.answers))}</td><td>${esc(PROG[r.answers.q4]||'-')}</td><td>${esc(ansText(QI.b2,r.answers))}</td><td>${esc(r.answers.free||'')}</td></tr>`).join('') || '<tr><td colspan="5">아직 응답이 없어요</td></tr>'}
+    </table></div>
+    <p class="small">최근 30건까지 보여요. 전체 응답은 CSV로 받으세요.</p>
     <h2>날짜별</h2>
     <table><tr><th>날짜</th><th>응답</th></tr>
     ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k]}</td></tr>`).join('')}</table>
@@ -328,7 +338,29 @@ async function renderAdmin(){
     <table><tr><th>영역</th><th>선택 수</th><th>응답자 대비</th></tr>
     ${f1.opts.map(([v,t]) => `<tr><td>${esc(t.split(':')[0])}</td><td>${f1n[v]||0}</td><td>${rows.length?Math.round((f1n[v]||0)/rows.length*100):0}%</td></tr>`).join('')}
     </table>
-    <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다. 관리자 PIN은 Supabase dagam_settings 표의 admin_pin과 같습니다.</p>`;
+    <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다.</p>
+    ${isAdmin ? `<div class="card" style="margin-top:22px;border-color:#e6b8a2">
+      <h2>응답 초기화</h2>
+      <p class="hint">통합 만족도 조사 응답을 <b>모두 삭제</b>해요. 되돌릴 수 없으니 CSV를 먼저 받아 두세요. 이전 이벤트 설문 기록은 지워지지 않아요.</p>
+      <div id="resetBox"><button class="btn" style="width:100%;background:#b4561e;border-color:#b4561e" id="resetBtn">응답 초기화</button></div>
+    </div>` : ''}`;
+  $('#reload').onclick = again;
+  if(isAdmin) $('#resetBtn').onclick = () => {
+    $('#resetBox').innerHTML = `<p style="margin:0 0 8px;font-weight:700">전체 응답 ${rows.length}건을 삭제할까요? 아래 칸에 <b>삭제</b>라고 입력해 주세요.</p>
+      <input class="etc" id="resetIn" placeholder="삭제" autocomplete="off">
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="resetNo">취소</button><button class="btn" style="background:#b4561e;border-color:#b4561e" id="resetYes">삭제하기</button></div>
+      <div class="err" id="resetErr"></div>`;
+    $('#resetNo').onclick = again;
+    $('#resetYes').onclick = async () => {
+      if($('#resetIn').value.trim()!=='삭제'){ $('#resetErr').textContent="'삭제'라고 입력해야 진행돼요."; return; }
+      $('#resetYes').disabled = true;
+      try{ const r = await rpc('dagam3_reset', {p_pin: pin});
+        if(r.status==='ok'){ toast(`응답 ${r.deleted}건을 삭제했어요.`); again(); }
+        else $('#resetErr').textContent = 'PIN이 맞지 않아요.';
+      }catch(e){ $('#resetErr').textContent = '삭제 실패. 연결을 확인해 주세요.'; }
+      $('#resetYes').disabled = false;
+    };
+  };
   const toCsv = (list, QS, name) => {
     const head = ['응답시각', ...QS.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
     const lines = [head, ...list.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), ...QS.map(q => ansText(q, r.answers))])]
@@ -345,6 +377,7 @@ $('#back').onclick = () => go(-1);
 const qs = location.search;
 if(qs.includes('reset')){ try{ localStorage.removeItem(LS_KEY); }catch(e){} location.replace(location.pathname); }
 else if(qs.includes('admin')) renderAdmin();
+else if(qs.includes('staff')) renderStaff();
 else { const s = store(); if(s.code) showDone(true); else renderIntro(); }
 </script>
 </body>
