@@ -74,6 +74,10 @@ th{background:#f1eee7}
 .opts.multi .opt::before{content:'';position:absolute;left:16px;top:50%;width:20px;height:20px;margin-top:-10px;border:2px solid var(--line);border-radius:5px;background:#fff}
 .opts.multi .opt.on::before{background:var(--ink);border-color:var(--ink)}
 .opts.multi .opt.on::after{content:'';position:absolute;left:23px;top:50%;width:6px;height:11px;margin-top:-8px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+.lead .evt{display:block;font-weight:600;margin-top:6px}.lead .small2{font-size:13px;color:var(--sub)}
+.lead .evt-box{display:block;margin-top:10px;padding:10px 12px;background:#fff;border-radius:10px;font-weight:500;font-size:13.5px;line-height:1.6;color:#4a463e}
+.lead .evt-box b{display:block;margin-bottom:4px}.lead .evt+b,.lead .evt-box+b{margin-top:10px}
+.flab{display:block;font-size:15px;font-weight:700;margin:14px 0 0}
 .guide{font-size:13px;color:var(--sub);background:#f4f2ec;border-radius:10px;padding:10px 12px;margin:4px 0 8px;word-break:keep-all;line-height:1.5}
 </style>
 </head>
@@ -152,8 +156,21 @@ const Q = [
           ['mind','마음상담 프로그램: 정서 코칭, 비언어적 심리상담, 집단 공감 대화를 통한 마음 회복'],
           ['smart','스마트 웰니스 프로그램: AI 건강 측정 및 디지털 건강 기기 활용 등 스마트 자기관리 활동'],
           ['etc','기타 (직접 입력)']]},
-  {id:'free', no:'Q2', sec:'향후 프로그램 · 제언', type:'text', optional:true, title:"'웰니스 학습라운지 다감'에서 좋았던 점, 아쉬웠던 점, 또는 바라는 점이 있다면 자유롭게 남겨주세요."}
+  {id:'free', no:'Q2', sec:'향후 프로그램 · 제언', type:'text', optional:true, title:"'웰니스 학습라운지 다감'에서 좋았던 점, 아쉬웠던 점, 또는 바라는 점이 있다면 자유롭게 남겨주세요."},
+
+  {id:'c1', no:'Q1', sec:'감사 이벤트 (선택)', lead:{event:true}, type:'single', title:'위와 같이 개인정보를 수집 및 이용하는 것에 동의하십니까?',
+    opts:[['y','동의함'],['n','동의하지 않음 (동의하지 않으시면 설문이 종료됩니다)']]},
+  {id:'c2', no:'Q2', sec:'감사 이벤트 (선택)', type:'contact', private:true, title:'기념품 수령을 위한 성함과 연락처를 입력해 주세요.', when:a=>a.c1==='y'}
 ];
+const PUBLIC_Q = Q.filter(q => !q.private);
+const EVENT_HTML = `<b class="bt">🎁 '웰니스 학습라운지 다감' 설문 참여 감사 이벤트 안내</b>
+<span class="evt">설문에 응답해 주신 분 중 추첨을 통해 소정의 기념품을 보내드립니다. 이벤트 참여를 원하시는 분은 아래 개인정보 수집·이용 동의 후 성함과 연락처를 남겨주세요.</span>
+<span class="evt small2">※ 개인정보 입력은 선택 사항이며, 입력하지 않으셔도 설문은 정상적으로 제출됩니다.</span>
+<span class="evt-box"><b>📌 개인정보 수집 · 이용 동의 안내</b>
+· 수집·이용 목적: 웰니스 학습라운지 다감 설문 참여 감사 기념품 추첨 및 발송<br>
+· 수집 항목: 성명, 휴대폰 번호<br>
+· 보유 및 이용 기간: 기념품 발송 및 수령 확인 완료 후 1개월 이내 즉시 파기<br>
+· 동의 거부 권리: 귀하는 개인정보 수집·이용 동의를 거부할 권리가 있으며, 동의하지 않으셔도 설문 참여에는 불이익이 없습니다. (단, 이벤트 추첨 대상에서는 제외됩니다.)</span>`;
 
 const QI = {}; Q.forEach(q => QI[q.id] = q);
 
@@ -172,7 +189,9 @@ function deviceId(){ let s = store(); if(s.device) return s.device; const id = (
 function toast(t){ const el=$('#toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none', 2400); }
 function fmtTime(t){ if(!t) return ''; return new Date(t).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
 function ansText(q, a){
+  if(q.type==='contact') return [a[q.id+'_name'], a[q.id+'_phone']].filter(Boolean).join(' / ');
   const v = a[q.id]; if(v===undefined || v===null || v==='') return '';
+  if(q.type==='contact') return '';
   if(q.type==='text') return v;
   const lab = x => { if(x==='etc') return '기타: ' + (a[q.id+'_etc'] || ''); const o = q.opts.find(o => o[0]===x); return o ? o[1] : x; };
   if(Array.isArray(v)) return v.map(lab).join(' / ');
@@ -182,15 +201,15 @@ function ansText(q, a){
 /* ---------- 구글시트 ---------- */
 function sheetPost(obj){ if(!SHEET_WEBHOOK) return; try{ fetch(SHEET_WEBHOOK, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(obj)}).catch(()=>{}); }catch(e){} }
 function sheetResponse(code){
-  const head = ['응답시각', ...Q.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
-  const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), ...Q.map(q => ansText(q, A))];
+  const head = ['응답시각', ...PUBLIC_Q.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
+  const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), ...PUBLIC_Q.map(q => ansText(q, A))];
   sheetPost({type:'response', sheet:'통합만족도', headers:head, row});
 }
 
 /* ---------- 설문 ---------- */
 let A = {}, idx = -1, sending = false;
 const visible = () => Q.filter(q => !q.when || q.when(A));
-function cleanup(){ const ids = new Set(visible().map(q=>q.id)); Object.keys(A).forEach(k => { const base = k.replace(/_etc$/,''); if(!ids.has(base)) delete A[k]; }); }
+function cleanup(){ const ids = new Set(visible().map(q=>q.id)); Object.keys(A).forEach(k => { const base = k.replace(/_(etc|name|phone)$/,''); if(!ids.has(base)) delete A[k]; }); }
 
 function renderIntro(){
   $('#nav').style.display=''; $('#progWrap').style.visibility='hidden'; $('#step').textContent='';
@@ -216,12 +235,17 @@ function renderQ(){
   if(q.type==='single' || q.type==='multi'){
     body = `<div class="opts ${q.type==='multi'?'multi':''}">${q.opts.map(([v,t]) => `<button class="opt ${isOn(v)?'on':''}" data-v="${v}">${esc(t)}</button>`).join('')}</div>`;
     if(hasEtc) body += `<input class="etc" id="etcIn" maxlength="200" placeholder="직접 입력해 주세요" value="${esc(A[q.id+'_etc']||'')}">`;
+  } else if(q.type==='contact'){
+    body = `<label class="flab">성함</label><input class="etc" id="cName" maxlength="30" autocomplete="name" value="${esc(A[q.id+'_name']||'')}">
+      <label class="flab">연락처</label><input class="etc" id="cPhone" inputmode="numeric" maxlength="13" autocomplete="tel" placeholder="010-0000-0000" value="${esc(A[q.id+'_phone']||'')}">
+      <p class="small" id="cErr" style="color:var(--warn);margin:8px 0 0"></p>`;
   } else {
     body = `<textarea id="txt" maxlength="800" placeholder="자유롭게 적어 주세요">${esc(A[q.id]||'')}</textarea>`;
   }
   let leadHtml = '';
   if(showLead && showLead.img) leadHtml = `<img class="leadimg" src="${showLead.img}" alt="${esc(showLead.alt||'')}">`;
   if(showLead && showLead.brand) leadHtml = `<div class="brandbox"><img src="${LOGO_DAGAM}" alt="다감 로고"><div><b class="bt">💡 '웰니스 학습라운지 다감'이란?</b><span>[다감] 무뎌진 다양한 감각(多感)을 다시 깨우며 '다시, 감각하는 삶'으로, 시민 삶의 질을 높이는 공간</span></div></div>`;
+  if(showLead && showLead.event) leadHtml = EVENT_HTML;
   if(typeof showLead === 'string') leadHtml = `<span class="ld">${esc(showLead)}</span>`;
   $('#app').innerHTML = `<div class="card"><span class="sec">${esc(q.sec)}${q.tag?' · '+esc(q.tag):''}</span>
     ${(showLead && showLead.img) ? leadHtml : ''}
@@ -246,6 +270,15 @@ function renderQ(){
   $('#back').style.visibility='visible';
   $('#next').textContent = idx === vs.length-1 ? '제출하기' : '다음';
   $('#next').disabled = !(q.optional || (A[q.id] !== undefined && A[q.id] !== '' && !(Array.isArray(A[q.id]) && !A[q.id].length)));
+  if(q.type==='contact'){
+    const fmt = v => { const d = v.replace(/\D/g,'').slice(0,11); return d.length<4?d : d.length<8? d.slice(0,3)+'-'+d.slice(3) : d.slice(0,3)+'-'+d.slice(3,d.length-4)+'-'+d.slice(-4); };
+    const chk = () => { const n = (A[q.id+'_name']||'').trim(), ph = (A[q.id+'_phone']||'').replace(/\D/g,'');
+      const ok = n.length>=2 && /^01\d{8,9}$/.test(ph); $('#next').disabled = !ok;
+      $('#cErr').textContent = (ph.length>=10 && !/^01\d{8,9}$/.test(ph)) ? '휴대폰 번호를 확인해 주세요.' : ''; };
+    $('#cName').oninput = e => { A[q.id+'_name'] = e.target.value; chk(); };
+    $('#cPhone').oninput = e => { e.target.value = fmt(e.target.value); A[q.id+'_phone'] = e.target.value; chk(); };
+    chk();
+  }
 }
 
 function go(d){
@@ -277,6 +310,7 @@ function showDone(again){
     <div style="font-size:44px;line-height:1;margin-bottom:12px">💌</div>
     <h1 style="margin-bottom:10px">설문 완료</h1>
     <p style="margin:0">${again?'이미 설문에 참여해 주셨어요.<br>':''}소중한 의견을 남겨주셔서 감사합니다!</p>
+    <p style="margin:14px 0 0;font-weight:700">— 설문에 응해 주셔서 진심으로 감사드립니다 —</p>
     <p class="small" style="margin-top:14px">남겨주신 의견은 웰니스 학습라운지 다감을<br>더 편안하고 좋은 공간으로 만드는 데 활용하겠습니다.</p>
   </div>`;
 }
@@ -339,7 +373,14 @@ async function renderView(mode){
     ${f1.opts.map(([v,t]) => `<tr><td>${esc(t.split(':')[0])}</td><td>${f1n[v]||0}</td><td>${rows.length?Math.round((f1n[v]||0)/rows.length*100):0}%</td></tr>`).join('')}
     </table>
     <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다.</p>
-    ${isAdmin ? `<div class="card" style="margin-top:22px;border-color:#e6b8a2">
+    ${isAdmin ? `<div class="card" style="margin-top:22px">
+      <h2>감사 이벤트 추첨 대상자</h2>
+      <p class="hint">개인정보 동의 후 연락처를 남긴 응답 <b>${rows.filter(r => r.answers.c1==='y' && r.answers.c2_name).length}건</b>. 성함·연락처는 관리자 화면에서만 보여요.</p>
+      <button class="btn" style="width:100%" id="csvC">추첨 대상자 CSV 내려받기</button>
+      <button class="staffbtn" id="purgeBtn">연락처만 파기 (응답 내용은 유지)</button>
+      <p class="small" style="margin-top:8px">기념품 발송·수령 확인 후 1개월 이내에 '연락처만 파기'를 눌러 주세요.</p>
+    </div>
+    <div class="card" style="margin-top:22px;border-color:#e6b8a2">
       <h2>응답 초기화</h2>
       <p class="hint">통합 만족도 조사 응답을 <b>모두 삭제</b>해요. 되돌릴 수 없으니 CSV를 먼저 받아 두세요. 이전 이벤트 설문 기록은 지워지지 않아요.</p>
       <div id="resetBox"><button class="btn" style="width:100%;background:#b4561e;border-color:#b4561e" id="resetBtn">응답 초기화</button></div>
@@ -368,7 +409,23 @@ async function renderView(mode){
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff'+lines], {type:'text/csv;charset=utf-8'}));
     a.download = name+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
   };
-  $('#csv').onclick = () => toCsv(rows, Q, 'dagam_통합만족도');
+  $('#csv').onclick = () => toCsv(rows, isAdmin ? Q : PUBLIC_Q, 'dagam_통합만족도');
+  if(isAdmin){
+    $('#csvC').onclick = () => {
+      const list = rows.filter(r => r.answers.c1==='y' && r.answers.c2_name);
+      const lines = [['응답시각','성함','연락처'], ...list.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), r.answers.c2_name||'', r.answers.c2_phone||''])]
+        .map(row => row.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff'+lines], {type:'text/csv;charset=utf-8'}));
+      a.download = 'dagam_추첨대상자_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+    };
+    $('#purgeBtn').onclick = async () => {
+      if($('#purgeBtn').dataset.step!=='2'){ $('#purgeBtn').dataset.step='2'; $('#purgeBtn').textContent='한 번 더 누르면 연락처가 파기돼요'; return; }
+      $('#purgeBtn').disabled = true;
+      try{ const r = await rpc('dagam3_purge_contacts', {p_pin: pin});
+        if(r.status==='ok'){ toast(`연락처 ${r.purged}건을 파기했어요.`); again(); } else toast('PIN이 맞지 않아요.');
+      }catch(e){ toast('파기 실패. 연결을 확인해 주세요.'); $('#purgeBtn').disabled = false; }
+    };
+  }
 }
 
 /* ---------- 시작 ---------- */
