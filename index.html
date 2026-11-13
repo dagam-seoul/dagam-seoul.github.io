@@ -85,23 +85,13 @@ th{background:#f1eee7}
 </div>
 <div class="nav" id="nav"><div class="in"><button class="btn ghost" id="back">이전</button><button class="btn" id="next">다음</button></div></div>
 
-<div class="modal" id="pinModal"><div class="card">
-  <h2>담당자 확인</h2>
-  <p class="hint" style="margin-bottom:6px">드릴 기념품을 고르고 PIN 4자리를 입력해 주세요.</p>
-  <div class="giftpick" id="giftPick"><button class="opt" data-g="tea">블렌드티 세트</button><button class="opt" data-g="seed">씨앗팔레트</button></div>
-  <div class="guide">블렌드티: 프로그램 예약·참여 + 다감 우체국 참여 (올리 예약 확인)<br>씨앗팔레트: 프로그램 미참여 + 이벤트 참여, 또는 손목닥터9988 앱 설치·네이버 리뷰 확인</div>
-  <input class="pin" id="pinIn" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN">
-  <div class="row"><button class="btn ghost" id="pinCancel">취소</button><button class="btn" id="pinOk">증정 완료</button></div>
-  <div class="err" id="pinErr"></div>
-</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
 const SB_URL = 'https://oeanjnpliiibjjvzfkmc.supabase.co';
 const SB_KEY = 'sb_publishable_sHlEN3-Q3q2kuWc_U5IwSg_5k--8LhF';
-const LS_KEY = 'dagam_survey_v3';
+const LS_KEY = 'dagam_integrated_v1';
 const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzjjzCxOGgwKl4bSLaoEqboEDBMRHMKlUfA9c-FH5XICszYpGs3kAwBs6lyfTRlyKup/exec';
-const GIFT = {tea:'블렌드티 세트', seed:'씨앗팔레트'};
 const PROG = {post:'다감 우체국', garden:'다감가든', both:'다감 우체국 · 다감가든', none:'다감 일반 공간'};
 
 /* ---------- 문항 (v3 통합 만족도 조사 · 시립대 + 플랜백) ---------- */
@@ -165,34 +155,6 @@ const Q = [
   {id:'free', no:'Q2', sec:'향후 프로그램 · 제언', type:'text', optional:true, title:"'웰니스 학습라운지 다감'에서 좋았던 점, 아쉬웠던 점, 또는 바라는 점이 있다면 자유롭게 남겨주세요."}
 ];
 
-/* 이전 이벤트 만족도 조사(v2, ~11/13) 문항: 관리자 CSV 내려받기용 */
-const OLD_POST_LEAD = '나만의 돌봄 방법을 생각하고 적어본 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
-const OLD_GARDEN_LEAD = '다감가든에서 자연을 가까이 만나고 잠시 쉬어간 시간은 어떠셨나요? 오늘의 경험을 떠올리며 편하게 답해 주세요.';
-const OLD_POST_STEM = '오늘 다감 우체국에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
-const OLD_GARDEN_STEM = '오늘 다감가든에서의 경험은 어떠셨나요? 가장 가까운 답을 골라주세요.';
-const Q_OLD = [
-  {id:'q1', no:'Q1', sec:'기본 정보', type:'single', title:'성별을 알려주세요.', opts:[['f','여성'],['m','남성']]},
-  {id:'q2', no:'Q2', sec:'기본 정보', type:'single', title:'연령대를 알려주세요.', opts:[['20','20대 이하'],['30','30대'],['40','40대'],['50','50대'],['60','60대'],['70','70대 이상']]},
-  {id:'q3', no:'Q3', sec:'기본 정보', type:'single', title:'다감 우체국 또는 다감가든을 어떻게 알게 되셨나요?', opts:[['web','홈페이지·SNS'],['friend','지인 소개'],['site','현장에서 알게 되었어요.'],['etc','기타 (직접 입력)']]},
-  {id:'q4', no:'Q4', sec:'기본 정보', type:'single', title:'오늘 어떤 프로그램에 참여하셨나요?', opts:[['post','다감 우체국'],['garden','다감가든'],['both','두 프로그램 모두']]},
-
-  {id:'p1', no:'Q1', sec:'다감 우체국', lead:OLD_POST_LEAD, stem:OLD_POST_STEM, type:'single', num:true, title:'다감 우체국에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='post'},
-  {id:'p2_1', no:'Q2-1', sec:'다감 우체국', lead:OLD_POST_LEAD, stem:OLD_POST_STEM, type:'single', num:true, title:'나에게 필요한 돌봄 방법을 생각해 볼 수 있었어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
-  {id:'p2_2', no:'Q2-2', sec:'다감 우체국', stem:OLD_POST_STEM, type:'single', num:true, title:'오늘 떠올린 돌봄 방법을 일상에서 실천해 보고 싶어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
-  {id:'p2_3', no:'Q2-3', sec:'다감 우체국', stem:OLD_POST_STEM, type:'single', num:true, title:'다른 사람의 돌봄 방법을 읽으며 나에게도 도움이 될 만한 방법을 발견했어요.', opts:AGR, when:a=>a.q4==='post'||a.q4==='both'},
-  {id:'p3', no:'Q3', sec:'다감 우체국', stem:"기억나는 내용이 없다면 '공감되는 내용이 없었어요.'를 선택해주세요.", type:'single', title:'다른 사람이 보내온 편지 중 가장 공감되는 돌봄 방법은 어떤 감각과 관련되어 있었나요?', opts:[['scent','향'],['taste','맛'],['touch','촉감'],['move','움직임'],['rest','쉼'],['none','공감되는 내용이 없었어요.'],['unread','아직 편지를 읽지 않았어요.']], when:a=>a.q4==='post'||a.q4==='both'},
-  {id:'p4', no:'Q4', sec:'다감 우체국', type:'single', title:'앞으로 다감 우체국에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['guide','나만의 돌봄 방법을 떠올리는 데 도움이 되는 안내와 예시'],['env','편지를 편안하게 쓰고 읽을 수 있는 환경'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:a=>a.q4==='post'||a.q4==='both'},
-
-  {id:'g1', no:'Q1', sec:'다감가든', lead:OLD_GARDEN_LEAD, stem:OLD_GARDEN_STEM, type:'single', num:true, title:'다감가든에서 보낸 시간은 얼마나 만족스러우셨나요?', opts:SAT, when:a=>a.q4==='garden'},
-  {id:'g2_1', no:'Q2-1', sec:'다감가든', lead:OLD_GARDEN_LEAD, stem:OLD_GARDEN_STEM, type:'single', num:true, title:'자연의 향과 색, 촉감 등을 경험하며 평소보다 감각이 더 생생해지는 것을 느꼈어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
-  {id:'g2_2', no:'Q2-2', sec:'다감가든', stem:OLD_GARDEN_STEM, type:'single', num:true, title:'자연을 가까이하는 시간이 일상에서 잠시 벗어나 쉬어가는 데 도움이 되었어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
-  {id:'g2_3', no:'Q2-3', sec:'다감가든', stem:OLD_GARDEN_STEM, type:'single', num:true, title:'앞으로도 자연을 다양한 감각으로 경험할 수 있는 프로그램에 참여하고 싶어요.', opts:AGR, when:a=>a.q4==='garden'||a.q4==='both'},
-  {id:'g3', no:'Q3', sec:'다감가든', type:'single', title:'오늘 다감가든에서 가장 기억에 남는 경험은 무엇인가요?', opts:[['scent','향'],['color','색'],['touch','촉감'],['shape','모양 관찰'],['rest','쉼'],['none','특별히 없음']], when:a=>a.q4==='garden'||a.q4==='both'},
-  {id:'g4', no:'Q4', sec:'다감가든', type:'single', title:'앞으로 다감가든에서 어떤 점이 더 좋아지면 좋을까요? 가장 필요한 것 하나를 골라주세요.', opts:[['more','더 다양한 식물과 자연 소재를 경험할 수 있으면 좋겠어요.'],['guide','자연을 어떻게 관찰하고 체험하면 좋을지 안내가 더 자세하면 좋겠어요.'],['seat','자연을 천천히 경험할 수 있도록 머무는 자리가 더 있으면 좋겠어요.'],['none','특별히 개선할 점은 없어요.'],['etc','기타 (직접 입력)']], when:a=>a.q4==='garden'||a.q4==='both'},
-
-  {id:'free', sec:'자유 의견', type:'text', optional:true, title:'상시 운영 프로그램에 참여하면서 좋았던 점이나 바라는 점이 있다면 편하게 남겨주세요.',
-    hint:'앞으로 새롭게 생겼으면 하는 체험도 좋아요.\n예) 손목닥터9988처럼 다감에서 경험한 웰니스 활동을 일상에서도 이어갈 수 있도록 관련 프로그램이나 실천 방법을 안내해 주면 좋겠어요.\n예) 다감가든 주변에서 헤드셋으로 음악을 들으며 참여하는 사일런트 요가(무소음 요가)를 해보고 싶어요.'}
-];
 const QI = {}; Q.forEach(q => QI[q.id] = q);
 
 /* ---------- 공통 ---------- */
@@ -220,11 +182,10 @@ function ansText(q, a){
 /* ---------- 구글시트 ---------- */
 function sheetPost(obj){ if(!SHEET_WEBHOOK) return; try{ fetch(SHEET_WEBHOOK, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(obj)}).catch(()=>{}); }catch(e){} }
 function sheetResponse(code){
-  const head = ['응답시각','교환권', ...Q.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
-  const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), code, ...Q.map(q => ansText(q, A))];
-  sheetPost({type:'response', headers:head, row});
+  const head = ['응답시각', ...Q.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
+  const row = [new Date().toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), ...Q.map(q => ansText(q, A))];
+  sheetPost({type:'response', sheet:'통합만족도', headers:head, row});
 }
-function sheetRedeem(code, gift, time){ sheetPost({type:'redeem', code, gift: GIFT[gift]||gift, time: new Date(time||Date.now()).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})}); }
 
 /* ---------- 설문 ---------- */
 let A = {}, idx = -1, sending = false;
@@ -299,7 +260,7 @@ async function submit(){
   if(sending) return; sending = true; $('#next').disabled = true; $('#next').textContent='보내는 중…';
   cleanup(); A.v = SURVEY_VER;
   try{
-    const res = await rpc('dagam_submit', {p_device: deviceId(), p_answers: A});
+    const res = await rpc('dagam3_submit', {p_device: deviceId(), p_answers: A});
     save({code: res.code});
     if(!res.existing) sheetResponse(res.code);
     showDone(false);
@@ -320,62 +281,9 @@ function showDone(again){
   </div>`;
 }
 
-/* ---------- (이전) 교환권 · 스태프 증정용 ---------- */
-async function showCoupon(code){
-  $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='';
-  let c = null; try{ c = await rpc('dagam_coupon', {p_code: code}); }catch(e){}
-  if(!c){ $('#app').innerHTML = `<div class="card"><h2>화면을 불러오지 못했어요</h2><p class="hint">인터넷 연결을 확인한 뒤 새로고침해 주세요.</p></div>`; return; }
-  const used = !!c.redeemed_at;
-  $('#app').innerHTML = `<div class="card coupon ${used?'is-used':''}">
-    <h1 style="margin-bottom:6px">설문 완료</h1>
-    <p style="margin:0 0 14px">소중한 의견을 남겨주셔서 감사합니다!${used?'':'<br>기념품 수령을 위해 이 화면을 <b>스태프</b>에게 보여주세요.'}</p>
-    <div>${used?`<span class="badge used">기념품 수령 완료 · ${fmtTime(c.redeemed_at)}</span>`:`<span class="badge ready">수령 가능</span>`}</div>
-    <div class="code">${esc(code)}</div>
-    ${c.visit?`<p class="small" style="margin:4px 0 0">참여: ${esc(PROG[c.visit]||c.visit)}</p>`:''}
-    ${used&&c.gift?`<div class="gift">${GIFT[c.gift]}</div>`:''}
-    <p class="small" style="margin-top:12px">기념품은 소진 시 종료 · 1인 1회</p>
-    ${used?'':`<button class="staffbtn" id="staffBtn">스태프 전용 · 기념품 증정 처리</button>`}
-  </div>`;
-  const sb = $('#staffBtn'); if(sb) sb.onclick = () => openPin(code);
-}
-
-let pinCode = null, pinGift = null, afterRedeem = null;
-function openPin(code, after){
-  pinCode = code; pinGift = null; afterRedeem = after || null;
-  $('#pinIn').value=''; $('#pinErr').textContent='';
-  $('#giftPick').querySelectorAll('.opt').forEach(b => b.classList.remove('on'));
-  try{ const p = sessionStorage.getItem('dagam_pin'); if(p) $('#pinIn').value = p; }catch(e){}
-  $('#pinModal').classList.add('on');
-}
-$('#giftPick').querySelectorAll('.opt').forEach(b => b.onclick = () => {
-  pinGift = b.dataset.g; $('#giftPick').querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x===b));
-});
-$('#pinCancel').onclick = () => $('#pinModal').classList.remove('on');
-$('#pinOk').onclick = async () => {
-  const pin = $('#pinIn').value.trim();
-  if(!pinGift){ $('#pinErr').textContent='드릴 기념품을 골라 주세요.'; return; }
-  if(pin.length<4){ $('#pinErr').textContent='PIN 4자리를 입력해 주세요.'; return; }
-  $('#pinOk').disabled = true;
-  try{
-    const r = await rpc('dagam_redeem', {p_code: pinCode, p_pin: pin, p_gift: pinGift});
-    if(r.status==='bad_pin') $('#pinErr').textContent='PIN이 맞지 않아요.';
-    else if(r.status==='already') $('#pinErr').textContent='이미 증정 완료된 응답이에요 ('+fmtTime(r.redeemed_at)+').';
-    else if(r.status==='sold_out') $('#pinErr').textContent=`${GIFT[r.gift]} ${r.slot==='am'?'오전':'오후'} 회차 수량이 모두 소진됐어요.`;
-    else if(r.status==='ok'){
-      $('#pinModal').classList.remove('on');
-      try{ sessionStorage.setItem('dagam_pin', pin); }catch(e){}
-      sheetRedeem(pinCode, r.gift, r.redeemed_at);
-      const ct = r.counts, k = r.gift;
-      toast(ct[k+'_'+ct.slot+'_limit']>0 ? `${GIFT[k]} 증정 완료 · ${ct.slot==='am'?'오전':'오후'} ${ct[k+'_'+ct.slot]}/${ct[k+'_'+ct.slot+'_limit']}` : `${GIFT[k]} 증정 완료 · 누적 ${ct[k+'_all']}/${ct[k+'_total']}`);
-      if(afterRedeem) afterRedeem(); else showCoupon(pinCode);
-    } else $('#pinErr').textContent='처리할 수 없는 번호예요.';
-  }catch(e){ $('#pinErr').textContent='전송 실패. 연결을 확인해 주세요.'; }
-  $('#pinOk').disabled = false;
-};
-
-/* ---------- 스태프 화면 (?staff) ---------- */
+/* ---------- PIN 입력 ---------- */
 function pinGate(fn, key, next){
-  $('#app').innerHTML = `<div class="card"><h2>PIN 입력</h2><p class="hint">${fn==='dagam_admin'?'관리자':'스태프'} PIN 4자리</p>
+  $('#app').innerHTML = `<div class="card"><h2>PIN 입력</h2><p class="hint">${fn==='dagam3_admin'?'관리자':'스태프'} PIN 4자리</p>
     <input class="pin" id="gatePin" inputmode="numeric" maxlength="4"><button class="btn" style="width:100%" id="gateOk">확인</button><div class="err" id="gateErr"></div></div>`;
   $('#gateOk').onclick = async () => {
     const p = $('#gatePin').value.trim();
@@ -384,59 +292,18 @@ function pinGate(fn, key, next){
     }catch(e){ $('#gateErr').textContent='연결 실패'; }
   };
 }
-async function renderStaff(){
-  $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='스태프';
-  let pin = null; try{ pin = sessionStorage.getItem('dagam_pin'); }catch(e){}
-  if(!pin) return pinGate('dagam_staff', 'dagam_pin', renderStaff);
-  let d; try{ d = await rpc('dagam_staff', {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
-  if(d.status!=='ok'){ try{ sessionStorage.removeItem('dagam_pin'); }catch(e){} return renderStaff(); }
-  const c = d.counts;
-  $('#app').innerHTML = `
-    <h1>기념품 증정 현황</h1>
-    <div class="stat">
-      ${['tea','seed'].map(k=>{ const cur=c.slot, n=c[k+'_'+cur], lim=c[k+'_'+cur+'_limit'];
-        if(!(c[k+'_am_limit']>0 || c[k+'_pm_limit']>0))
-          return `<div><span>${GIFT[k]} · 오늘</span><b>${c[k+'_today']}개</b><span>누적 ${c[k+'_all']} / ${c[k+'_total']}<br>회차 한도 없음</span></div>`;
-        return `<div><span>${GIFT[k]} · ${cur==="am"?"오전":"오후"} 회차</span><b class="${n>=lim?'over':''}">${n} / ${lim}</b>
-        <span>오전 ${c[k+'_am']}/${c[k+'_am_limit']} · 오후 ${c[k+'_pm']}/${c[k+'_pm_limit']}<br>누적 ${c[k+'_all']} / ${c[k+'_total']}</span></div>`; }).join('')}
-    </div>
-    <p class="small">오늘 설문 응답 ${c.resp_today}건 · ${c.cutoff}부터 오후 회차 · ${c.block==='on'?'씨앗팔레트는 회차 한도 도달 시 증정이 막히고, 매일 0부터 다시 세요.':'한도는 표시만 돼요.'}</p>
-    <div class="card" style="margin:14px 0">
-      <h2>응답 번호로 처리</h2><p class="hint">참여자 화면이 닫혔을 때 번호 5자리를 입력하세요.</p>
-      <input class="codein" id="codeIn" maxlength="5" autocomplete="off">
-      <button class="btn" style="width:100%;margin-top:10px" id="lookBtn">조회</button>
-      <div id="look"></div>
-    </div>
-    <h2>최근 증정</h2>
-    <table><tr><th>시간</th><th>번호</th><th>기념품</th></tr>
-    ${d.recent.map(r => `<tr><td>${fmtTime(r.redeemed_at)}</td><td>${esc(r.code)}</td><td>${GIFT[r.gift]||''}</td></tr>`).join('') || '<tr><td colspan="3">아직 없어요</td></tr>'}
-    </table>
-    <button class="staffbtn" onclick="renderStaff()">새로고침</button>`;
-  $('#lookBtn').onclick = async () => {
-    const code = $('#codeIn').value.trim().toUpperCase(); if(code.length<5) return;
-    let c2 = null; try{ c2 = await rpc('dagam_coupon', {p_code: code}); }catch(e){}
-    const box = $('#look');
-    if(!c2){ box.innerHTML = '<p class="err">없는 번호예요.</p>'; return; }
-    if(c2.redeemed_at){ box.innerHTML = `<p class="err">이미 증정 완료 (${GIFT[c2.gift]||''} · ${fmtTime(c2.redeemed_at)})</p>`; return; }
-    box.innerHTML = `<p style="margin:12px 0 4px">참여: <b>${esc(PROG[c2.visit]||'-')}</b> · 수령 가능</p><button class="btn" style="width:100%;margin-top:8px" id="doRedeem">기념품 증정 처리</button>`;
-    $('#doRedeem').onclick = () => openPin(code, renderStaff);
-  };
-}
-
 /* ---------- 관리자 화면 (?admin) ---------- */
 async function renderAdmin(){
   $('#nav').style.display='none'; $('#progWrap').style.visibility='hidden'; $('#step').textContent='관리자';
-  let pin = null; try{ pin = sessionStorage.getItem('dagam_admin_pin'); }catch(e){}
-  if(!pin) return pinGate('dagam_admin', 'dagam_admin_pin', renderAdmin);
-  let d; try{ d = await rpc('dagam_admin', {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
-  if(d.status!=='ok'){ try{ sessionStorage.removeItem('dagam_admin_pin'); }catch(e){} return renderAdmin(); }
+  let pin = null; try{ pin = sessionStorage.getItem('dagam3_admin_pin'); }catch(e){}
+  if(!pin) return pinGate('dagam3_admin', 'dagam3_admin_pin', renderAdmin);
+  let d; try{ d = await rpc('dagam3_admin', {p_pin: pin}); }catch(e){ $('#app').innerHTML='<p class="err">불러오기 실패</p>'; return; }
+  if(d.status!=='ok'){ try{ sessionStorage.removeItem('dagam3_admin_pin'); }catch(e){} return renderAdmin(); }
   const all = d.rows, c = d.counts;
-  const rows = all.filter(r => r.answers && r.answers.v === SURVEY_VER);
-  const oldRows = all.filter(r => !(r.answers && r.answers.v === SURVEY_VER));
+  const rows = all;
   const day = t => new Date(t).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit'});
   const byDay = {};
-  all.forEach(r => { const k = day(r.created_at); byDay[k] = byDay[k] || {n:0,tea:0,seed:0}; byDay[k].n++;
-    if(r.redeemed_at && r.gift){ const k2 = day(r.redeemed_at); byDay[k2] = byDay[k2] || {n:0,tea:0,seed:0}; byDay[k2][r.gift]++; } });
+  all.forEach(r => { const k = day(r.created_at); byDay[k] = (byDay[k]||0) + 1; });
   const prog = {post:0, garden:0, both:0, none:0}; rows.forEach(r => { if(prog[r.answers.q4]!==undefined) prog[r.answers.q4]++; });
   const avg = (id, grp) => { const v = rows.filter(r => !grp || r.answers.q4===grp).map(r => r.answers[id]).filter(x => typeof x==='number');
     if(!v.length) return '–'; return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(2)+' · '+Math.round(v.filter(x=>x>=4).length/v.length*100)+'% ('+v.length+')'; };
@@ -446,14 +313,13 @@ async function renderAdmin(){
   $('#app').innerHTML = `
     <h1>설문·기념품 현황</h1>
     <div class="stat">
-      <div><span>통합 만족도 조사 응답</span><b>${rows.length}</b><span>우체국만 ${prog.post} · 가든만 ${prog.garden} · 모두 ${prog.both} · 체험 없음 ${prog.none}<br>이전 이벤트 설문 ${oldRows.length}건 · 오늘 전체 ${c.resp_today}</span></div>
-      <div><span>기념품 증정 누적</span><b>${c.tea_all + c.seed_all}</b><span>블렌드티 ${c.tea_all}/${c.tea_total} · 씨앗 ${c.seed_all}/${c.seed_total}</span></div>
+      <div><span>전체 응답</span><b>${rows.length}</b><span>오늘 ${c.resp_today}</span></div>
+      <div><span>이벤트 공간 체험</span><b>${prog.post+prog.garden+prog.both}</b><span>우체국만 ${prog.post} · 가든만 ${prog.garden} · 모두 ${prog.both} · 체험 없음 ${prog.none}</span></div>
     </div>
-    <button class="btn" style="width:100%;margin:6px 0 8px" id="csv">통합 만족도 조사 CSV 내려받기</button>
-    <button class="btn ghost" style="width:100%;margin:0 0 18px" id="csvOld">이전 이벤트 만족도 조사 CSV (${oldRows.length}건)</button>
+    <button class="btn" style="width:100%;margin:6px 0 18px" id="csv">응답 전체 CSV 내려받기</button>
     <h2>날짜별</h2>
-    <table><tr><th>날짜</th><th>응답</th><th>블렌드티</th><th>씨앗</th></tr>
-    ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k].n}</td><td>${byDay[k].tea||0}</td><td>${byDay[k].seed||0}</td></tr>`).join('')}</table>
+    <table><tr><th>날짜</th><th>응답</th></tr>
+    ${Object.keys(byDay).sort().map(k => `<tr><td>${k}</td><td>${byDay[k]}</td></tr>`).join('')}</table>
     <h2 style="margin-top:22px">5점 척도 문항 (평균 · 긍정률)</h2>
     <table><tr><th>문항</th><th>전체</th><th>우체국만</th><th>가든만</th><th>모두</th><th>체험 없음</th></tr>
     ${numQs.map(q => `<tr><td>${label(q)}</td><td>${avg(q.id)}</td><td>${avg(q.id,'post')}</td><td>${avg(q.id,'garden')}</td><td>${avg(q.id,'both')}</td><td>${avg(q.id,'none')}</td></tr>`).join('')}
@@ -462,26 +328,23 @@ async function renderAdmin(){
     <table><tr><th>영역</th><th>선택 수</th><th>응답자 대비</th></tr>
     ${f1.opts.map(([v,t]) => `<tr><td>${esc(t.split(':')[0])}</td><td>${f1n[v]||0}</td><td>${rows.length?Math.round((f1n[v]||0)/rows.length*100):0}%</td></tr>`).join('')}
     </table>
-    <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다. 설정(PIN·수량)은 Supabase dagam_settings 표에서 바꿉니다.</p>`;
+    <p class="small">5점 = 매우 그렇다·매우 만족. 긍정률 = 4~5점 비율. '해당 없음'은 평균에서 빠집니다. 관리자 PIN은 Supabase dagam_settings 표의 admin_pin과 같습니다.</p>`;
   const toCsv = (list, QS, name) => {
-    const head = ['응답시각','응답번호','기념품','증정시각', ...QS.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
-    const lines = [head, ...list.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), r.coupon_code, GIFT[r.gift]||'',
-      r.redeemed_at ? new Date(r.redeemed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) : '', ...QS.map(q => ansText(q, r.answers))])]
+    const head = ['응답시각', ...QS.map(q => `[${q.sec}] ${q.no||''}${q.tag?' '+q.tag:''} ${q.title}`)];
+    const lines = [head, ...list.map(r => [new Date(r.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}), ...QS.map(q => ansText(q, r.answers))])]
       .map(row => row.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff'+lines], {type:'text/csv;charset=utf-8'}));
     a.download = name+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
   };
   $('#csv').onclick = () => toCsv(rows, Q, 'dagam_통합만족도');
-  $('#csvOld').onclick = () => toCsv(oldRows, Q_OLD, 'dagam_이전이벤트설문');
 }
 
 /* ---------- 시작 ---------- */
 $('#next').onclick = () => go(1);
 $('#back').onclick = () => go(-1);
 const qs = location.search;
-if(qs.includes('reset')){ try{ localStorage.removeItem(LS_KEY); localStorage.removeItem('dagam_survey_v2'); localStorage.removeItem('dagam_survey_v1'); }catch(e){} location.replace(location.pathname); }
+if(qs.includes('reset')){ try{ localStorage.removeItem(LS_KEY); }catch(e){} location.replace(location.pathname); }
 else if(qs.includes('admin')) renderAdmin();
-else if(qs.includes('staff')) renderStaff();
 else { const s = store(); if(s.code) showDone(true); else renderIntro(); }
 </script>
 </body>
